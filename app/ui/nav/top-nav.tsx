@@ -12,18 +12,25 @@ type Link = {
     label: string;
     dropdownLinks?: { href: string; label: string; dot?: string; }[];
     authRequired?: boolean;
+    dot?: string;
 };
 
 const links: Link[] = [
   {
-    label: "Guides",
+    label: "Openness",
+    href: "/openness",
     authRequired: true,
-    dropdownLinks: [
-        { href: "/guides/contemplation", label: "Contemplation", dot: "red" },
-        { href: "/guides/deepest-vision", label: "Deepest Vision", dot: "lightBlue"},
-        { href: "/guides/mind-clearing", label: "Mind Clearing", dot: "yellow" },
-      ],
-    },
+    dot: "yellow",
+  },
+  // {
+  //   label: "Guides",
+  //   authRequired: true,
+  //   dropdownLinks: [
+  //       { href: "/guides/contemplation", label: "Contemplation", dot: "red" },
+  //       { href: "/guides/deepest-vision", label: "Deepest Vision", dot: "lightBlue"},
+  //       { href: "/guides/mind-clearing", label: "Mind Clearing", dot: "yellow" },
+  //     ],
+  //   },
     {
         label: "Account",
         authRequired: true,
@@ -95,12 +102,12 @@ export default function TopNav() {
                         <Link
                           key={dropdownIndex}
                           href={dropdownLink.href}
-                          className="block px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center"
+                          className="block px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center group"
                           onClick={() => setOpenDropdownIndex(null)}
                         >
                           {dropdownLink.dot && (
                             <span 
-                              className="w-2 h-2 rounded-full mr-2"
+                              className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-150"
                               style={{ backgroundColor: dropdownLink.dot }}
                             />
                           )}
@@ -117,8 +124,14 @@ export default function TopNav() {
               <Link
                 key={index}
                 href={link.href!}
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center group"
               >
+                {link.dot && (
+                  <span 
+                    className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-150"
+                    style={{ backgroundColor: link.dot }}
+                  />
+                )}
                 {link.label}
               </Link>
             );
@@ -216,12 +229,12 @@ export default function TopNav() {
                               <Link
                                 key={dropdownIndex}
                                 href={dropdownLink.href}
-                                className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors flex items-center"
+                                className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors flex items-center group"
                                 onClick={() => setIsMenuOpen(false)}
                               >
                                 {dropdownLink.dot && (
                                   <span 
-                                    className="w-2 h-2 rounded-full mr-2"
+                                    className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-150"
                                     style={{ backgroundColor: dropdownLink.dot }}
                                   />
                                 )}
@@ -238,9 +251,15 @@ export default function TopNav() {
                     <Link
                       key={index}
                       href={link.href!}
-                      className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                      className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors flex items-center group"
                       onClick={() => setIsMenuOpen(false)}
                     >
+                      {link.dot && (
+                        <span 
+                          className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-150"
+                          style={{ backgroundColor: link.dot }}
+                        />
+                      )}
                       {link.label}
                     </Link>
                   );

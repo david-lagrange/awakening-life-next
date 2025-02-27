@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Subscription Updated - Auth Template',
+    title: 'Subscription Updated - Awakening Life',
     description: 'Your subscription has been successfully updated',
     type: 'website',
     images: [{

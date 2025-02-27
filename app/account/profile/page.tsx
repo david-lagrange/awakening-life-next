@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Account Profile - Auth Template',
+    title: 'Account Profile - Awakening Life',
     description: 'Manage your account settings, subscription, and security preferences',
     type: 'website',
     images: [{

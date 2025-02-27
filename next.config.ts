@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
-        'stripe-subscription.diq730ubdvk5r.amplifyapp.com',
+        'https://main.d2a428892sprkl.amplifyapp.com',
+        'https://development.d2a428892sprkl.amplifyapp.com',
+        'https://awakeninglife.ai',
+        'http://awakeninglife.ai',
         'localhost:3000',
         // Add any other domains you want to trust
       ],

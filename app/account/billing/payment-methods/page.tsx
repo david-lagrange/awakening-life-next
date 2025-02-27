@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Payment Methods - Auth Template',
+    title: 'Payment Methods - Awakening Life',
     description: 'Manage your payment methods, add new cards, and set default payment options',
     type: 'website',
     images: [{

@@ -3,11 +3,11 @@ import { Metadata } from 'next';
 import ExampleClientComp from './ui/example-client/example-client-comp';
 
 export const metadata: Metadata = {
-  title: 'Home | Auth Template',
-  description: 'Auth Template - A secure and customizable authentication solution for modern web applications',
-  keywords: ['Auth Template', 'Authentication', 'Security', 'Login', 'Registration', 'Web App'],
+  title: 'Home | Awakening Life',
+  description: 'Awakening Life - A secure and customizable authentication solution for modern web applications',
+  keywords: ['Awakening Life', 'Authentication', 'Security', 'Login', 'Registration', 'Web App'],
   openGraph: {
-    title: 'Auth Template - Secure Authentication Solution',
+    title: 'Awakening Life - Secure Authentication Solution',
     description: 'A secure and customizable authentication solution for modern web applications',
     url: 'https://somedomain.com',
     type: 'website',
@@ -15,12 +15,12 @@ export const metadata: Metadata = {
       url: '/home-specific-og.jpg',
       width: 1200,
       height: 630,
-      alt: 'Auth Template Homepage',
+      alt: 'Awakening Life Homepage',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auth Template - Secure Authentication Solution',
+    title: 'Awakening Life - Secure Authentication Solution',
     description: 'A secure and customizable authentication solution for modern web applications',
     images: ['/home-specific-og.jpg'],
   },
@@ -41,10 +41,10 @@ export default async function Home() {
     <main className="min-h-screen dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-5xl font-bold mb-3 text-gray-900 dark:text-gray-100" id="main-heading">
-        Auth Template
+        Awakening Life
         </h1>
         <p className="text-lg mb-8 text-gray-600 dark:text-gray-400" role="doc-subtitle">
-          Auth Template
+          Awakening Life
         </p>
         <ExampleClientComp />
       </div>

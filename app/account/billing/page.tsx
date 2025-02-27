@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Billing & Payments - Auth Template',
+    title: 'Billing & Payments - Awakening Life',
     description: 'Manage your subscription billing, payment methods, and view invoice history',
     type: 'website',
     images: [{

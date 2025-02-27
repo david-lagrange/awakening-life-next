@@ -15,21 +15,14 @@ type Link = {
 };
 
 const links: Link[] = [
-    {
-      href: "/feature-1",
-      label: "Feature 1"
-    },
-    {
-      href: "/feature-2",
-      label: "Feature 2"
-    },
-    {
-        href: "/protected-path",
-        label: "Protected Path"
-    },
-    {
-      href: "/public-path-1",
-      label: "Public Path",
+  {
+    label: "Guides",
+    authRequired: true,
+    dropdownLinks: [
+        { href: "/guides/contemplation", label: "Contemplation", dot: "red" },
+        { href: "/guides/deepest-vision", label: "Deepest Vision", dot: "lightBlue"},
+        { href: "/guides/mind-clearing", label: "Mind Clearing", dot: "yellow" },
+      ],
     },
     {
         label: "Account",
@@ -46,16 +39,16 @@ const links: Link[] = [
 
 export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [openMobileDropdownIndex, setOpenMobileDropdownIndex] = useState<number | null>(null);
+  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
+  const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
+      if (dropdownRefs.current.every(ref => ref && !ref.contains(event.target as Node))) {
+        setOpenDropdownIndex(null);
       }
     }
 
@@ -83,21 +76,27 @@ export default function TopNav() {
           if (link.dropdownLinks) {
             return (
               (!link.authRequired || (link.authRequired && session)) && (
-                <div key={index} className="relative" ref={dropdownRef}>
+                <div 
+                  key={index} 
+                  className="relative" 
+                  ref={el => {
+                    dropdownRefs.current[index] = el;
+                  }}
+                >
                   <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
                     className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors"
                   >
                     {link.label}
                   </button>
-                  {dropdownOpen && (
+                  {openDropdownIndex === index && (
                     <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
                       {link.dropdownLinks.map((dropdownLink, dropdownIndex) => (
                         <Link
                           key={dropdownIndex}
                           href={dropdownLink.href}
                           className="block px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center"
-                          onClick={() => setDropdownOpen(false)}
+                          onClick={() => setOpenDropdownIndex(null)}
                         >
                           {dropdownLink.dot && (
                             <span 
@@ -137,7 +136,7 @@ export default function TopNav() {
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-gray-800 dark:text-gray-50 font-semibold text-lg">
-              Auth Template
+              Awakening Life
             </Link>
           </div>
 
@@ -206,12 +205,12 @@ export default function TopNav() {
                     (!link.authRequired || (link.authRequired && session)) && (
                       <div key={index}>
                         <button
-                          onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                          onClick={() => setOpenMobileDropdownIndex(openMobileDropdownIndex === index ? null : index)}
                           className="w-full text-left px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
                         >
                           {link.label}
                         </button>
-                        {mobileDropdownOpen && (
+                        {openMobileDropdownIndex === index && (
                           <div className="pl-6">
                             {link.dropdownLinks.map((dropdownLink, dropdownIndex) => (
                               <Link

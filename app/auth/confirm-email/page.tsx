@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Confirm Your Email - Auth Template',
+    title: 'Confirm Your Email - Awakening Life',
     description: 'Verify your email address to complete your account registration',
     type: 'website',
     images: [{

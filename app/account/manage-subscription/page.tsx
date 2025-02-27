@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Manage Subscription - Auth Template',
+    title: 'Manage Subscription - Awakening Life',
     description: 'Choose a subscription plan that fits your needs and manage your current subscription',
     type: 'website',
     images: [{

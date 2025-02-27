@@ -10,11 +10,11 @@ import { SessionProvider } from 'next-auth/react';
 export const metadata: Metadata = {
   metadataBase: new URL('https://somedomain.com'),
   title: {
-    template: '%s | Auth Template',
-    default: 'Auth Template', // Used when no template is provided
+    template: '%s | Awakening Life',
+    default: 'Awakening Life', // Used when no template is provided
   },
-  description: 'Auth Template - A secure authentication solution for your web applications',
-  keywords: ['Auth Template', 'Authentication', 'Security', 'Web App', 'Next.js'],
+  description: 'Awakening Life - A secure authentication solution for your web applications',
+  keywords: ['Awakening Life', 'Authentication', 'Security', 'Web App', 'Next.js'],
   authors: [{ name: 'David Lagrange' }],
   creator: 'David Lagrange',
   robots: {
@@ -37,22 +37,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://somedomain.com',
-    siteName: 'Auth Template',
-    title: 'Auth Template - Secure Authentication Solution',
-    description: 'Auth Template - A secure authentication solution for your web applications',
+    siteName: 'Awakening Life',
+    title: 'Awakening Life - Secure Authentication Solution',
+    description: 'Awakening Life - A secure authentication solution for your web applications',
     images: [{
       url: '/default-og-image.jpg',
       width: 1200,
       height: 630,
-      alt: 'Auth Template',
+      alt: 'Awakening Life',
     }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@yourtwitterhandle',
     creator: '@yourtwitterhandle',
-    title: 'Auth Template - Secure Authentication Solution',
-    description: 'Auth Template - A secure authentication solution for your web applications',
+    title: 'Awakening Life - Secure Authentication Solution',
+    description: 'Awakening Life - A secure authentication solution for your web applications',
     images: ['/default-og-image.jpg'],
   },
   alternates: {

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Modify Subscription - Auth Template',
+    title: 'Modify Subscription - Awakening Life',
     description: 'Change your subscription plan, review pricing details, and manage payment methods',
     type: 'website',
     images: [{

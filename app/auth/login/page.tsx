@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'Login - Auth Template',
+    title: 'Login - Awakening Life',
     description: 'Sign in to your account to access your dashboard, manage your subscription, and more.',
     type: 'website',
     images: [{
       url: '/login-og-image.jpg',
       width: 1200,
       height: 630,
-      alt: 'Login to Auth Template',
+      alt: 'Login to Awakening Life',
     }],
   },
 };

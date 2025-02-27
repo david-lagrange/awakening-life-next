@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'Create Account - Auth Template',
+    title: 'Create Account - Awakening Life',
     description: 'Sign up for a new account to access our secure authentication platform and manage your subscription',
     type: 'website',
     images: [{

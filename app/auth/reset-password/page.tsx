@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Reset Password - Auth Template',
+    title: 'Reset Password - Awakening Life',
     description: 'Create a new password for your account',
     type: 'website',
     images: [{

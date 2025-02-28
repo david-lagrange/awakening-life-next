@@ -1,31 +1,42 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRealtimeApi } from '@/app/contexts/realtime-api-context';
 
 interface FunctionDefinition {
   type: 'function';
   name: string;
   description: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
 }
 
 interface FunctionCallHandler {
   name: string;
-  handler: (args: any) => Promise<any> | any;
+  handler: (args: Record<string, unknown>) => Promise<unknown> | unknown;
+}
+
+interface FunctionCall {
+  callId: string;
+  name: string;
+  args: Record<string, unknown>;
+}
+
+// Extended interface for RealtimeApiService with the missing method
+interface ExtendedRealtimeApi {
+  updateSession(config: Record<string, unknown>): void;
+  on(eventType: string, callback: (event: Record<string, unknown>) => void): void;
+  off(eventType: string, callback: (event: Record<string, unknown>) => void): void;
+  createResponse(options?: Record<string, unknown>): void;
+  sendFunctionCallOutput(callId: string, result: unknown): void;
 }
 
 export function useRealtimeFunctionCalling(
   functionDefinitions: FunctionDefinition[],
   functionHandlers: FunctionCallHandler[]
 ) {
-  const realtimeApi = useRealtimeApi();
+  const realtimeApi = useRealtimeApi() as unknown as ExtendedRealtimeApi;
   const [isProcessingFunctionCall, setIsProcessingFunctionCall] = useState(false);
-  const [currentFunctionCall, setCurrentFunctionCall] = useState<{
-    callId: string;
-    name: string;
-    args: any;
-  } | null>(null);
+  const [currentFunctionCall, setCurrentFunctionCall] = useState<FunctionCall | null>(null);
 
   // Register function definitions with the Realtime API
   useEffect(() => {
@@ -39,16 +50,18 @@ export function useRealtimeFunctionCalling(
 
   // Handle function call events from the Realtime API
   useEffect(() => {
-    const handleResponseDone = (event: any) => {
+    const handleResponseDone = (event: Record<string, unknown>) => {
       // Check if the response contains a function call
-      const functionCall = event.response?.output?.find((item: any) => item.type === 'function_call');
+      const response = event.response as Record<string, unknown> | undefined;
+      const output = response?.output as Array<Record<string, unknown>> | undefined;
+      const functionCall = output?.find((item) => item.type === 'function_call');
       
       if (functionCall) {
         try {
-          const args = JSON.parse(functionCall.arguments);
+          const args = JSON.parse(functionCall.arguments as string);
           setCurrentFunctionCall({
-            callId: functionCall.call_id,
-            name: functionCall.name,
+            callId: functionCall.call_id as string,
+            name: functionCall.name as string,
             args,
           });
           setIsProcessingFunctionCall(true);

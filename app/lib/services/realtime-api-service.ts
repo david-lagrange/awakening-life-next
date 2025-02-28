@@ -8,7 +8,7 @@ export class RealtimeApiService {
   private dataChannel: RTCDataChannel | null = null;
   private audioElement: HTMLAudioElement | null = null;
   private mediaStream: MediaStream | null = null;
-  private eventListeners: Map<string, Set<(event: any) => void>> = new Map();
+  private eventListeners: Map<string, Set<(event: Record<string, unknown>) => void>> = new Map();
   private ephemeralKey: string | null = null;
   private connected: boolean = false;
   private model: string = 'gpt-4o-2024-05-13';
@@ -177,7 +177,7 @@ export class RealtimeApiService {
   /**
    * Update session configuration
    */
-  updateSession(sessionConfig: any): void {
+  updateSession(sessionConfig: Record<string, unknown>): void {
     if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
       console.error('Data channel not open');
       return;
@@ -223,7 +223,7 @@ export class RealtimeApiService {
   createResponse(options: {
     modalities?: string[];
     instructions?: string;
-    tools?: any[];
+    tools?: Record<string, unknown>[];
   } = {}): void {
     if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
       console.error('Data channel not open');
@@ -255,7 +255,7 @@ export class RealtimeApiService {
   /**
    * Register an event listener
    */
-  on(eventType: string, callback: (event: any) => void): void {
+  on(eventType: string, callback: (event: Record<string, unknown>) => void): void {
     if (!this.eventListeners.has(eventType)) {
       this.eventListeners.set(eventType, new Set());
     }
@@ -265,14 +265,14 @@ export class RealtimeApiService {
   /**
    * Remove an event listener
    */
-  off(eventType: string, callback: (event: any) => void): void {
+  off(eventType: string, callback: (event: Record<string, unknown>) => void): void {
     this.eventListeners.get(eventType)?.delete(callback);
   }
 
   /**
    * Emit an event to all registered listeners
    */
-  private emit(eventType: string, event: any): void {
+  private emit(eventType: string, event: Record<string, unknown>): void {
     console.log(`Emitting event: ${eventType}`, event);
     
     // First, emit to specific event listeners

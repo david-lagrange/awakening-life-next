@@ -48,9 +48,25 @@ const resourceDatabase = {
   },
 };
 
+// Define types for resources
+// type ResourceTopic = 'finding meaning' | 'career purpose' | 'spiritual purpose';
+type ResourceType = 'books' | 'articles' | 'exercises' | 'all';
+
+interface SuggestResourcesArgs {
+  topic: string;
+  resource_type?: ResourceType;
+}
+
+interface SuggestResourcesResult {
+  topic: string;
+  books?: Array<{ title: string; author: string }>;
+  articles?: Array<{ title: string; source: string }>;
+  exercises?: Array<{ title: string; description: string }>;
+}
+
 export function useLifePurposeFunctions() {
   // Function to suggest resources based on user interests
-  const suggestResources = async (args: { topic: string; resource_type?: string }) => {
+  const suggestResources = async (args: SuggestResourcesArgs): Promise<SuggestResourcesResult> => {
     const { topic, resource_type = 'all' } = args;
     
     // Find the closest matching topic
@@ -60,7 +76,7 @@ export function useLifePurposeFunctions() {
     ) || 'finding meaning'; // Default to 'finding meaning' if no match
     
     // Gather resources based on resource_type
-    const result: any = { topic: matchedTopic };
+    const result: SuggestResourcesResult = { topic: matchedTopic };
     
     if (resource_type === 'all' || resource_type === 'books') {
       result.books = resourceDatabase.books[matchedTopic as keyof typeof resourceDatabase.books] || [];
@@ -105,7 +121,7 @@ export function useLifePurposeFunctions() {
   const functionHandlers = [
     {
       name: 'suggest_resources',
-      handler: suggestResources,
+      handler: suggestResources as unknown as (args: Record<string, unknown>) => Promise<unknown>,
     },
   ];
 

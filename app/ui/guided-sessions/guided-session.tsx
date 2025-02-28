@@ -28,7 +28,7 @@ interface GuidedSessionProps {
   systemPrompt: string;
   model?: string;
   voice?: string;
-  tools?: any[];
+  tools?: Record<string, unknown>[];
   color?: string; // New prop for the circle color
 }
 
@@ -131,46 +131,46 @@ export default function GuidedSession({
       realtimeApiRef.current = realtimeApi;
     
       // Set up event listeners
-      realtimeApi.on('connection', (event) => {
+      realtimeApi.on('connection', (event: Record<string, unknown>) => {
         console.log('Connection event:', event);
         handleConnectionEvent(event);
       });
-      realtimeApi.on('error', (event) => {
+      realtimeApi.on('error', (event: Record<string, unknown>) => {
         console.log('Error event:', event);
         handleErrorEvent(event);
       });
-      realtimeApi.on('session.created', (event) => {
+      realtimeApi.on('session.created', (event: Record<string, unknown>) => {
         console.log('Session created event:', event);
-        handleSessionCreated(event);
+        handleSessionCreated();
       });
-      realtimeApi.on('response.text.delta', (event) => {
+      realtimeApi.on('response.text.delta', (event: Record<string, unknown>) => {
         console.log('Text delta event:', event);
         handleTextDelta(event);
       });
-      realtimeApi.on('response.audio.delta', (event) => {
+      realtimeApi.on('response.audio.delta', (event: Record<string, unknown>) => {
         console.log('Audio delta event:', event);
-        handleAudioDelta(event);
+        handleAudioDelta();
       });
-      realtimeApi.on('response.done', (event) => {
+      realtimeApi.on('response.done', (event: Record<string, unknown>) => {
         console.log('Response done event:', event);
-        handleResponseDone(event);
+        handleResponseDone();
       });
-      realtimeApi.on('input_audio_buffer.speech_started', (event) => {
+      realtimeApi.on('input_audio_buffer.speech_started', (event: Record<string, unknown>) => {
         console.log('Speech started event:', event);
-        handleSpeechStarted(event);
+        handleSpeechStarted();
       });
-      realtimeApi.on('input_audio_buffer.speech_stopped', (event) => {
+      realtimeApi.on('input_audio_buffer.speech_stopped', (event: Record<string, unknown>) => {
         console.log('Speech stopped event:', event);
-        handleSpeechStopped(event);
+        handleSpeechStopped();
       });
-      realtimeApi.on('response.audio_transcript.delta', (event) => {
+      realtimeApi.on('response.audio_transcript.delta', (event: Record<string, unknown>) => {
         console.log('Audio transcript delta event:', event);
         console.log('Delta value:', event.delta);
         handleAudioTranscriptDelta(event);
       });
       
       // Add a catch-all event listener to see ALL events
-      realtimeApi.on('*', (event) => {
+      realtimeApi.on('*', (event: Record<string, unknown>) => {
         console.log('Received event:', event);
       });
       
@@ -219,7 +219,7 @@ export default function GuidedSession({
   }, []);
   
   // Event handlers
-  const handleConnectionEvent = (event: any) => {
+  const handleConnectionEvent = (event: Record<string, unknown>) => {
     if (event.status === 'connected') {
       setIsConnected(true);
       setIsConnecting(false);
@@ -236,7 +236,7 @@ export default function GuidedSession({
     }
   };
   
-  const handleErrorEvent = (event: any) => {
+  const handleErrorEvent = (event: Record<string, unknown>) => {
     console.error('Realtime API error:', event.error);
     const errorMessage = event.error instanceof Error 
       ? event.error.message 
@@ -246,14 +246,14 @@ export default function GuidedSession({
     setIsConnecting(false);
   };
   
-  const handleSessionCreated = (event: any) => {
-    console.log('Session created:', event);
+  const handleSessionCreated = () => {
+    console.log('Session created');
   };
   
-  const handleTextDelta = (event: any) => {
+  const handleTextDelta = (event: Record<string, unknown>) => {
     console.log('Text delta:', event);
 
-    const delta = event.delta.text;
+    const delta = event.delta as { text: string };
     
     // Update any "Processing your speech..." messages to "Communication received."
     setMessages(prevMessages => {
@@ -272,7 +272,7 @@ export default function GuidedSession({
         // Update existing message
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
-          content: updatedMessages[messageIndex].content + delta,
+          content: updatedMessages[messageIndex].content + delta.text,
         };
         return updatedMessages;
       } else {
@@ -284,7 +284,7 @@ export default function GuidedSession({
           {
             id: newMessageId,
             role: 'assistant',
-            content: delta,
+            content: delta.text,
             isComplete: false,
           },
         ];
@@ -292,12 +292,12 @@ export default function GuidedSession({
     });
   };
   
-  const handleAudioDelta = (event: any) => {
+  const handleAudioDelta = () => {
     // Audio is handled automatically by WebRTC, but we can track when audio is playing
     setIsModelSpeaking(true);
   };
   
-  const handleResponseDone = (event: any) => {
+  const handleResponseDone = () => {
     setIsModelSpeaking(false);
     setIsProcessing(false);
     
@@ -314,7 +314,7 @@ export default function GuidedSession({
     }
   };
   
-  const handleSpeechStarted = (event: any) => {
+  const handleSpeechStarted = () => {
     // User started speaking
     if (!messages.some(msg => msg.role === 'user' && !msg.isComplete)) {
       // Add a new user message if one doesn't exist
@@ -331,7 +331,7 @@ export default function GuidedSession({
     }
   };
   
-  const handleSpeechStopped = (event: any) => {
+  const handleSpeechStopped = () => {
     // User stopped speaking
     setMessages(prevMessages => 
       prevMessages.map(msg => 
@@ -343,7 +343,7 @@ export default function GuidedSession({
   };
   
   // Add a new handler for audio transcript deltas
-  const handleAudioTranscriptDelta = (event: any) => {
+  const handleAudioTranscriptDelta = (event: Record<string, unknown>) => {
     console.log('Audio transcript delta:', event);
 
     // The delta is directly a string in this case

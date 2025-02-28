@@ -11,7 +11,8 @@ import {
   PaperAirplaneIcon,
   ExclamationTriangleIcon,
   ChatBubbleLeftRightIcon,
-  XMarkIcon
+  XMarkIcon,
+  NoSymbolIcon
 } from '@heroicons/react/24/outline';
 
 interface Message {
@@ -50,15 +51,60 @@ export default function GuidedSession({
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiUnavailable, setApiUnavailable] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatWidth, setChatWidth] = useState(384); // Default width (96rem)
+  const [isResizing, setIsResizing] = useState(false);
   
   const realtimeApiRef = useRef<RealtimeApiService | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentMessageIdRef = useRef<string | null>(null);
+  const resizeHandleRef = useRef<HTMLDivElement>(null);
   
   // Scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  
+  // Handle resize drag
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      // Calculate new width based on mouse position
+      // We're dragging from right to left, so we subtract from window width
+      const newWidth = window.innerWidth - e.clientX;
+      
+      // Set min and max constraints
+      const minWidth = 300; // Minimum width in pixels
+      const maxWidth = Math.min(600, window.innerWidth * 0.8); // Maximum width in pixels, not more than 80% of window
+      
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setChatWidth(newWidth);
+      }
+    };
+    
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    };
+    
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none'; // Prevent text selection while resizing
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+  
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
   
   // Initialize Realtime API service
   const initializeSession = async () => {
@@ -143,6 +189,10 @@ export default function GuidedSession({
         });
       }
       
+      // Start with microphone active by default
+      realtimeApi.toggleMicrophone(true);
+      setIsMicActive(true);
+      
     } catch (error) {
       console.error('Failed to initialize session:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -205,15 +255,21 @@ export default function GuidedSession({
 
     const delta = event.delta.text;
     
+    // Update any "Processing your speech..." messages to "Communication received."
     setMessages(prevMessages => {
+      const updatedMessages = prevMessages.map(msg => 
+        msg.role === 'user' && msg.content === 'Processing your speech...' && msg.isComplete
+          ? { ...msg, content: 'Communication received.' }
+          : msg
+      );
+      
       // Find if we already have a message for this response
-      const messageIndex = prevMessages.findIndex(
+      const messageIndex = updatedMessages.findIndex(
         msg => msg.id === currentMessageIdRef.current && msg.role === 'assistant'
       );
       
       if (messageIndex >= 0) {
         // Update existing message
-        const updatedMessages = [...prevMessages];
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
           content: updatedMessages[messageIndex].content + delta,
@@ -224,7 +280,7 @@ export default function GuidedSession({
         const newMessageId = `msg_${Date.now()}`;
         currentMessageIdRef.current = newMessageId;
         return [
-          ...prevMessages,
+          ...updatedMessages,
           {
             id: newMessageId,
             role: 'assistant',
@@ -268,7 +324,7 @@ export default function GuidedSession({
         {
           id: newMessageId,
           role: 'user',
-          content: '🎤 Speaking...',
+          content: 'Listening...',
           isComplete: false,
         },
       ]);
@@ -280,7 +336,7 @@ export default function GuidedSession({
     setMessages(prevMessages => 
       prevMessages.map(msg => 
         msg.role === 'user' && !msg.isComplete
-          ? { ...msg, content: '🎤 Processing...', isComplete: true }
+          ? { ...msg, content: 'Processing your speech...', isComplete: true }
           : msg
       )
     );
@@ -301,14 +357,20 @@ export default function GuidedSession({
     console.log('Extracted delta text:', deltaText);
     
     setMessages(prevMessages => {
+      // Update any "Processing your speech..." messages to "Communication received."
+      const updatedMessages = prevMessages.map(msg => 
+        msg.role === 'user' && msg.content === 'Processing your speech...' && msg.isComplete
+          ? { ...msg, content: 'Communication received.' }
+          : msg
+      );
+      
       // Find if we already have a message for this response
-      const messageIndex = prevMessages.findIndex(
+      const messageIndex = updatedMessages.findIndex(
         msg => msg.id === currentMessageIdRef.current && msg.role === 'assistant'
       );
       
       if (messageIndex >= 0) {
         // Update existing message
-        const updatedMessages = [...prevMessages];
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
           content: updatedMessages[messageIndex].content + deltaText,
@@ -319,7 +381,7 @@ export default function GuidedSession({
         const newMessageId = `msg_${Date.now()}`;
         currentMessageIdRef.current = newMessageId;
         return [
-          ...prevMessages,
+          ...updatedMessages,
           {
             id: newMessageId,
             role: 'assistant',
@@ -448,50 +510,62 @@ export default function GuidedSession({
           {isConnected && (
             <div className="absolute top-full mt-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-10">
               {/* Microphone toggle button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMicrophone();
-                }}
-                className={`p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
-                  isMicActive 
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-                }`}
-                aria-label={isMicActive ? 'Stop speaking' : 'Start speaking'}
-              >
-                {isMicActive ? (
-                  <StopIcon className="h-5 w-5" aria-hidden="true" />
-                ) : (
-                  <MicrophoneIcon className="h-5 w-5" aria-hidden="true" />
-                )}
-              </button>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMicrophone();
+                  }}
+                  className={`p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                    isMicActive 
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                  }`}
+                  aria-label={isMicActive ? 'Stop speaking' : 'Start speaking'}
+                  title={isMicActive ? 'Turn microphone off' : 'Turn microphone on'}
+                >
+                  {isMicActive ? (
+                    <NoSymbolIcon className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <MicrophoneIcon className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
+                <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Microphone</span>
+              </div>
               
               {/* Chat toggle button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleChat();
-                }}
-                className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                  border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                aria-label="Toggle chat"
-              >
-                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleChat();
+                  }}
+                  className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                    border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  aria-label="Toggle chat"
+                  title={isChatOpen ? "Hide chat" : "Show chat"}
+                >
+                  <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Chat</span>
+              </div>
               
               {/* End session button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  disconnectSession();
-                }}
-                className="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
-                  border border-red-300 dark:border-red-800 focus:outline-none focus:ring-2 focus:ring-red-500/40"
-                aria-label="End session"
-              >
-                <StopIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    disconnectSession();
+                  }}
+                  className="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                    border border-red-300 dark:border-red-800 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                  aria-label="End session"
+                  title="End session"
+                >
+                  <StopIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Session</span>
+              </div>
             </div>
           )}
         </button>
@@ -522,29 +596,48 @@ export default function GuidedSession({
       
       {/* Chat sidebar */}
       <div 
-        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 lg:w-96 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
+        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
           transform transition-transform duration-300 ease-in-out z-40 flex flex-col
           ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ width: `${chatWidth}px` }}
       >
+        {/* Resize handle */}
+        <div 
+          ref={resizeHandleRef}
+          className="absolute top-0 left-0 w-1 h-full cursor-ew-resize group"
+          onMouseDown={startResize}
+          aria-hidden="true"
+        >
+          <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-blue-400 group-active:bg-blue-500 transition-colors"></div>
+        </div>
+        
         {/* Chat header */}
-        <div className="p-4 border-b border-gray-300 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Conversation</h2>
+        <div className="p-4 border-b border-t border-gray-300 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-blue-200 dark:bg-blue-900/30 mr-2.5" aria-hidden="true">
+              <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 text-blue-700 dark:text-blue-400" />
+            </div>
+            <h2 className="font-semibold text-gray-900 dark:text-white">Conversation</h2>
+          </div>
           <button 
             onClick={toggleChat}
-            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+            className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             aria-label="Close chat"
+            title="Close chat"
           >
             <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
         
         {/* Chat messages */}
-        <div className="flex-grow overflow-y-auto p-4 space-y-4">
+        <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 p-6">
-              <ChatBubbleLeftRightIcon className="h-12 w-12 mb-4" aria-hidden="true" />
+              <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                <ChatBubbleLeftRightIcon className="h-8 w-8" aria-hidden="true" />
+              </div>
               <p className="text-lg font-medium">No messages yet</p>
-              <p className="mt-2">Your conversation will appear here.</p>
+              <p className="mt-2 text-sm">Your conversation will appear here.</p>
             </div>
           )}
           
@@ -554,15 +647,15 @@ export default function GuidedSession({
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div 
-                className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                className={`max-w-[85%] rounded-lg px-4 py-3 shadow-sm ${
                   message.role === 'user' 
-                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800' 
+                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700'
                 }`}
               >
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="whitespace-pre-wrap text-sm">{message.content}</div>
                 {!message.isComplete && (
-                  <div className="mt-1 flex justify-end">
+                  <div className="mt-1.5 flex justify-end">
                     <div className="flex space-x-1">
                       <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse"></div>
                       <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-150"></div>
@@ -578,8 +671,8 @@ export default function GuidedSession({
         
         {/* Chat input */}
         {isConnected && (
-          <div className="p-4 border-t border-gray-300 dark:border-gray-700">
-            <div className="flex items-end space-x-2">
+          <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex items-stretch space-x-2">
               <div className="flex-grow relative">
                 <textarea
                   value={textInput}
@@ -587,10 +680,10 @@ export default function GuidedSession({
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
                   rows={1}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                    px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                  className="w-full h-10 rounded-md border border-gray-300 dark:border-gray-600 
+                    px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                     focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-transparent
-                    resize-none"
+                    resize-none text-sm"
                   disabled={isProcessing}
                 />
               </div>
@@ -598,12 +691,17 @@ export default function GuidedSession({
               <button
                 onClick={sendTextMessage}
                 disabled={!textInput.trim() || isProcessing}
-                className="flex-shrink-0 p-2.5 rounded-full bg-blue-600 text-white 
+                className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-md bg-blue-600 text-white 
                   hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors"
                 aria-label="Send message"
+                title="Send message"
               >
-                <PaperAirplaneIcon className="h-5 w-5" aria-hidden="true" />
+                {isProcessing ? (
+                  <ArrowPathIcon className="h-5 w-5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <PaperAirplaneIcon className="h-5 w-5" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>

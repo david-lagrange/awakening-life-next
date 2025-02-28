@@ -509,11 +509,6 @@ export default function GuidedSession({
                       duration-300 group-hover:scale-110" aria-hidden="true" />
                   )}
                 </div>
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full 
-                  bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 shadow-sm
-                  flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <ArrowPathIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                </div>
               </div>
               <span className="text-gray-700 dark:text-gray-300 font-medium text-sm tracking-wide">
                 {isConnecting ? "Connecting..." : "Start Session"}

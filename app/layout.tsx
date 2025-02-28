@@ -5,6 +5,7 @@ import TopNav from "@/app/ui/nav/top-nav";
 import { ThemeProvider } from '@/app/lib/providers/theme-provider';
 import { auth } from '@/auth';
 import { SessionProvider } from 'next-auth/react';
+import { RealtimeApiProvider } from '@/app/contexts/realtime-api-context';
 // import Footer from '@/app/ui/footer/footer';
 
 export const metadata: Metadata = {
@@ -81,22 +82,23 @@ export default async function RootLayout(props: {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${montserrat.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50 flex flex-col`}>
-        <SessionProvider session={session}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <TopNav />
-            <div className="pt-2 md:pt-8 flex-grow">
-              {props.children}
-              {props.modal}
-            </div>
-            {/* <Footer /> */}
-          </ThemeProvider>
-        </SessionProvider>
-        
+        <RealtimeApiProvider>
+          <SessionProvider session={session}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TopNav />
+              <div className="pt-2 md:pt-8 flex-grow">
+                {props.children}
+                {props.modal}
+              </div>
+              {/* <Footer /> */}
+            </ThemeProvider>
+          </SessionProvider>
+        </RealtimeApiProvider>
       </body>
     </html>
   );

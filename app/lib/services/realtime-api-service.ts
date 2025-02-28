@@ -66,7 +66,7 @@ export class RealtimeApiService {
           // Try to parse the error response as JSON
           const errorJson = JSON.parse(responseText);
           errorDetails = errorJson.details || errorJson.error || responseText;
-        } catch (e) {
+        } catch {
           // If parsing fails, use the raw text
           errorDetails = responseText;
         }

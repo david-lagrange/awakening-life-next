@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
+  images: {
+    domains: ['d1944sk4pyzciq.cloudfront.net'],
+  },
   experimental: {
     serverActions: {
       allowedOrigins: [

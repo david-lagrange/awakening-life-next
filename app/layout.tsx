@@ -91,7 +91,7 @@ export default async function RootLayout(props: {
               disableTransitionOnChange
             >
               <TopNav />
-              <div className="pt-2 md:pt-8 flex-grow">
+              <div className="flex-grow">
                 {props.children}
                 {props.modal}
               </div>

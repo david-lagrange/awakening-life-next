@@ -29,7 +29,7 @@ Keep your responses conversational, warm, and focused on helping them develop a 
           title="Daily Gratitude Session"
           description="Cultivate gratitude and appreciation through this guided conversation."
           systemPrompt={systemPrompt}
-          voice="nova" // Using a different voice for variety
+          voice="sage" // Using a different voice for variety
           color="#10B981" // Emerald-500 color that matches the subscription display's success states
         />
       </div>

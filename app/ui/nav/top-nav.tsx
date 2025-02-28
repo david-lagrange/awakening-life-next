@@ -17,20 +17,23 @@ type Link = {
 
 const links: Link[] = [
   {
+    label: "Life Purpose",
+    href: "/life-purpose",
+    authRequired: true,
+    dot: "#3B82F6", // Blue color from life-purpose page
+  },
+  {
+    label: "Gratitude",
+    href: "/gratitude",
+    authRequired: true,
+    dot: "#10B981", // Emerald color from gratitude page
+  },
+  {
     label: "Openness",
     href: "/openness",
     authRequired: true,
-    dot: "yellow",
+    dot: "#F59E0B", // Yellow color from openness page
   },
-  // {
-  //   label: "Guides",
-  //   authRequired: true,
-  //   dropdownLinks: [
-  //       { href: "/guides/contemplation", label: "Contemplation", dot: "red" },
-  //       { href: "/guides/deepest-vision", label: "Deepest Vision", dot: "lightBlue"},
-  //       { href: "/guides/mind-clearing", label: "Mind Clearing", dot: "yellow" },
-  //     ],
-  //   },
     {
         label: "Account",
         authRequired: true,

@@ -471,27 +471,21 @@ export default function GuidedSession({
           <p className="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
         </div>
         
-        {/* Glowing circle */}
+        {/* Start Session button - Minimal & Elegant */}
         <button
           onClick={isConnected ? toggleChat : initializeSession}
           disabled={isConnecting}
           className="relative group focus:outline-none mb-32"
           aria-label={isConnected ? "Toggle chat" : "Start session"}
         >
+          {isConnected ? (
           <div 
-            className={`w-32 h-32 rounded-full transition-all duration-300 flex items-center justify-center
-              ${isConnected 
-                ? `bg-opacity-80 shadow-lg` 
-                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500'}`}
+              className="w-32 h-32 rounded-full transition-all duration-300 flex items-center justify-center shadow-lg"
             style={{
-              backgroundColor: isConnected ? color : undefined,
-              boxShadow: isConnected ? `0 0 30px ${color}` : undefined
+                backgroundColor: color,
+                boxShadow: `0 0 30px ${color}`
             }}
           >
-            {isConnecting ? (
-              <ArrowPathIcon className="h-12 w-12 text-white animate-spin" />
-            ) : isConnected ? (
-              <div className="flex flex-col items-center">
                 {isModelSpeaking ? (
                   <SpeakerWaveIcon className="h-12 w-12 text-white animate-pulse" />
                 ) : isMicActive ? (
@@ -503,9 +497,29 @@ export default function GuidedSession({
                 )}
               </div>
             ) : (
-              <div className="text-white text-sm font-medium">Start Session</div>
-            )}
-          </div>
+              <div className="flex flex-col items-center">
+              <div className="relative mb-4">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 
+                  border border-blue-200/50 dark:border-blue-800/30 shadow-sm flex items-center justify-center
+                  transition-all duration-300 hover:shadow-md group-hover:border-blue-300 dark:group-hover:border-blue-700">
+                  {isConnecting ? (
+                    <ArrowPathIcon className="h-10 w-10 text-blue-500 dark:text-blue-400 animate-spin" />
+                  ) : (
+                    <ChatBubbleLeftRightIcon className="h-12 w-12 text-blue-500 dark:text-blue-400 transition-transform 
+                      duration-300 group-hover:scale-110" aria-hidden="true" />
+                  )}
+                </div>
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full 
+                  bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 shadow-sm
+                  flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <ArrowPathIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                </div>
+              </div>
+              <span className="text-gray-700 dark:text-gray-300 font-medium text-sm tracking-wide">
+                {isConnecting ? "Connecting..." : "Start Session"}
+              </span>
+            </div>
+          )}
           
           {isConnected && (
             <div className="absolute top-full mt-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-10">

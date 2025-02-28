@@ -24,13 +24,14 @@ Keep your responses conversational, warm, and focused on the user's growth. Avoi
 
   return (
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col">
         <GuidedSession
           title="Openness Guided Session"
           description="Explore and cultivate greater openness in your life through this guided conversation."
           systemPrompt={systemPrompt}
           model="gpt-4o-realtime-preview-2024-12-17"
           voice="alloy"
+          color="#F59E0B"
         />
       </div>
     </main>

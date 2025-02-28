@@ -8,7 +8,6 @@ import {
   StopIcon, 
   ArrowPathIcon,
   XCircleIcon,
-  CheckCircleIcon,
   PaperAirplaneIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
@@ -79,16 +78,50 @@ export default function GuidedSession({
       // Create new instance to ensure clean state
       const realtimeApi = new RealtimeApiService();
       realtimeApiRef.current = realtimeApi;
-      
+    
       // Set up event listeners
-      realtimeApi.on('connection', handleConnectionEvent);
-      realtimeApi.on('error', handleErrorEvent);
-      realtimeApi.on('session.created', handleSessionCreated);
-      realtimeApi.on('response.text.delta', handleTextDelta);
-      realtimeApi.on('response.audio.delta', handleAudioDelta);
-      realtimeApi.on('response.done', handleResponseDone);
-      realtimeApi.on('input_audio_buffer.speech_started', handleSpeechStarted);
-      realtimeApi.on('input_audio_buffer.speech_stopped', handleSpeechStopped);
+      realtimeApi.on('connection', (event) => {
+        console.log('Connection event:', event);
+        handleConnectionEvent(event);
+      });
+      realtimeApi.on('error', (event) => {
+        console.log('Error event:', event);
+        handleErrorEvent(event);
+      });
+      realtimeApi.on('session.created', (event) => {
+        console.log('Session created event:', event);
+        handleSessionCreated(event);
+      });
+      realtimeApi.on('response.text.delta', (event) => {
+        console.log('Text delta event:', event);
+        handleTextDelta(event);
+      });
+      realtimeApi.on('response.audio.delta', (event) => {
+        console.log('Audio delta event:', event);
+        handleAudioDelta(event);
+      });
+      realtimeApi.on('response.done', (event) => {
+        console.log('Response done event:', event);
+        handleResponseDone(event);
+      });
+      realtimeApi.on('input_audio_buffer.speech_started', (event) => {
+        console.log('Speech started event:', event);
+        handleSpeechStarted(event);
+      });
+      realtimeApi.on('input_audio_buffer.speech_stopped', (event) => {
+        console.log('Speech stopped event:', event);
+        handleSpeechStopped(event);
+      });
+      realtimeApi.on('response.audio_transcript.delta', (event) => {
+        console.log('Audio transcript delta event:', event);
+        console.log('Delta value:', event.delta);
+        handleAudioTranscriptDelta(event);
+      });
+      
+      // Add a catch-all event listener to see ALL events
+      realtimeApi.on('*', (event) => {
+        console.log('Received event:', event);
+      });
       
       // Initialize the service
       await realtimeApi.initialize({
@@ -163,6 +196,8 @@ export default function GuidedSession({
   };
   
   const handleTextDelta = (event: any) => {
+    console.log('Text delta:', event);
+
     const delta = event.delta.text;
     
     setMessages(prevMessages => {
@@ -246,6 +281,51 @@ export default function GuidedSession({
     );
   };
   
+  // Add a new handler for audio transcript deltas
+  const handleAudioTranscriptDelta = (event: any) => {
+    console.log('Audio transcript delta:', event);
+
+    // The delta is directly a string in this case
+    const deltaText = typeof event.delta === 'string' ? event.delta : '';
+    
+    if (!deltaText) {
+      console.error('Could not extract text from audio transcript delta:', event);
+      return;
+    }
+    
+    console.log('Extracted delta text:', deltaText);
+    
+    setMessages(prevMessages => {
+      // Find if we already have a message for this response
+      const messageIndex = prevMessages.findIndex(
+        msg => msg.id === currentMessageIdRef.current && msg.role === 'assistant'
+      );
+      
+      if (messageIndex >= 0) {
+        // Update existing message
+        const updatedMessages = [...prevMessages];
+        updatedMessages[messageIndex] = {
+          ...updatedMessages[messageIndex],
+          content: updatedMessages[messageIndex].content + deltaText,
+        };
+        return updatedMessages;
+      } else {
+        // Create new message
+        const newMessageId = `msg_${Date.now()}`;
+        currentMessageIdRef.current = newMessageId;
+        return [
+          ...prevMessages,
+          {
+            id: newMessageId,
+            role: 'assistant',
+            content: deltaText,
+            isComplete: false,
+          },
+        ];
+      }
+    });
+  };
+  
   // User actions
   const toggleMicrophone = () => {
     if (!realtimeApiRef.current) return;
@@ -264,6 +344,7 @@ export default function GuidedSession({
     if (!textInput.trim() || !realtimeApiRef.current || isProcessing) return;
     
     setIsProcessing(true);
+    console.log('Sending text message:', textInput);
     
     // Add user message
     const newMessageId = `msg_${Date.now()}`;
@@ -279,7 +360,13 @@ export default function GuidedSession({
     
     // Send message to API
     realtimeApiRef.current.sendTextMessage(textInput);
-    realtimeApiRef.current.createResponse();
+    
+    // Explicitly request a response with both text and audio modalities
+    realtimeApiRef.current.createResponse({
+      modalities: ["text", "audio"]
+    });
+    
+    console.log('Response requested');
     
     // Clear input
     setTextInput('');

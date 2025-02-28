@@ -241,27 +241,6 @@ export class RealtimeApiService {
   }
 
   /**
-   * Send function call output to the model
-   */
-  sendFunctionCallOutput(callId: string, output: any): void {
-    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
-      console.error('Data channel not open');
-      return;
-    }
-    
-    const event = {
-      type: 'conversation.item.create',
-      item: {
-        type: 'function_call_output',
-        call_id: callId,
-        output: JSON.stringify(output),
-      },
-    };
-    
-    this.dataChannel.send(JSON.stringify(event));
-  }
-
-  /**
    * Handle events from the server
    */
   private handleServerEvent = (e: MessageEvent): void => {
@@ -294,11 +273,23 @@ export class RealtimeApiService {
    * Emit an event to all registered listeners
    */
   private emit(eventType: string, event: any): void {
+    console.log(`Emitting event: ${eventType}`, event);
+    
+    // First, emit to specific event listeners
     this.eventListeners.get(eventType)?.forEach(callback => {
       try {
         callback(event);
       } catch (error) {
         console.error(`Error in ${eventType} event listener:`, error);
+      }
+    });
+    
+    // Then, emit to wildcard listeners
+    this.eventListeners.get('*')?.forEach(callback => {
+      try {
+        callback(event);
+      } catch (error) {
+        console.error(`Error in wildcard event listener:`, error);
       }
     });
   }

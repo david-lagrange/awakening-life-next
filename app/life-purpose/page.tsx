@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import GuidedSession from '@/app/ui/guided-sessions/guided-session';
 import { useLifePurposeFunctions } from '@/app/hooks/use-life-purpose-functions';
 
-export const metadata = {
-  title: 'Life Purpose Exploration',
-  description: 'A guided session to help you explore and discover your life purpose',
-};
+// export const metadata = {
+//   title: 'Life Purpose Exploration',
+//   description: 'A guided session to help you explore and discover your life purpose',
+// };
 
 export default function LifePurposePage() {
   const { isProcessingFunctionCall } = useLifePurposeFunctions();
@@ -55,7 +55,8 @@ You have access to a function called "suggest_resources" that can provide releva
           title="Life Purpose Exploration"
           description="Explore and discover your life purpose through this guided conversation."
           systemPrompt={systemPrompt}
-          voice="fable"
+          model="gpt-4o-realtime-preview-2024-12-17"
+          voice="ash"
         />
       </div>
     </main>

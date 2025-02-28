@@ -57,6 +57,7 @@ You have access to a function called "suggest_resources" that can provide releva
           systemPrompt={systemPrompt}
           model="gpt-4o-realtime-preview-2024-12-17"
           voice="ash"
+          color="#3B82F6" // Blue-500 color that matches subscription display's blue states
         />
       </div>
     </main>

@@ -44,6 +44,7 @@ export class RealtimeApiService {
    */
   private async getEphemeralKey(): Promise<void> {
     try {
+      console.log('Requesting ephemeral key from server...');
       const response = await fetch('/api/realtime/session', {
         method: 'POST',
         headers: {
@@ -55,12 +56,28 @@ export class RealtimeApiService {
         }),
       });
       
+      // Get the response text for better error reporting
+      const responseText = await response.text();
+      console.log('Server response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error(`Failed to get ephemeral key: ${response.statusText}`);
+        let errorDetails = 'Unknown error';
+        try {
+          // Try to parse the error response as JSON
+          const errorJson = JSON.parse(responseText);
+          errorDetails = errorJson.details || errorJson.error || responseText;
+        } catch (e) {
+          // If parsing fails, use the raw text
+          errorDetails = responseText;
+        }
+        
+        throw new Error(`Failed to get ephemeral key (${response.status}): ${errorDetails}`);
       }
       
-      const data = await response.json();
+      // Parse the successful response
+      const data = JSON.parse(responseText);
       this.ephemeralKey = data.client_secret.value;
+      console.log('Successfully obtained ephemeral key');
     } catch (error) {
       console.error('Error getting ephemeral key:', error);
       throw error;

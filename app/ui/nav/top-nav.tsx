@@ -51,11 +51,30 @@ export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openMobileDropdownIndex, setOpenMobileDropdownIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false); // Changed default to false
+  const [isClient, setIsClient] = useState(false); // Add this to track client-side rendering
   const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === '/';
+
+  // Add useEffect to handle window resize and initial check
+  useEffect(() => {
+    // Mark that we're now on the client
+    setIsClient(true);
+    
+    // Set initial value
+    setIsMobile(window.innerWidth < 768);
+    
+    // Add resize listener
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -147,8 +166,8 @@ export default function TopNav() {
     );
   }
 
-  // If we're on the home page and not on mobile, show minimal header
-  if (isHomePage && typeof window !== 'undefined' && window.innerWidth >= 768) {
+  // Only conditionally render based on client-side state when we're on the client
+  if (isHomePage && !isMobile && isClient) {
     return (
       <nav className="absolute w-full z-20 pt-4">
         <div className="w-full px-4 md:px-20">
@@ -187,9 +206,13 @@ export default function TopNav() {
     );
   }
 
-  // Regular navigation for all other pages
+  // Regular navigation for all other pages or when not yet client-side rendered
   return (
-    <nav className="relative w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-20">
+    <nav className={`relative w-full z-20 ${
+      isHomePage && isMobile && isClient
+        ? 'bg-transparent dark:bg-transparent border-transparent dark:border-transparent' 
+        : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
+    }`}>
       <div className="w-full px-4 md:px-20">
         <div className="flex justify-between h-16 items-center">
           {/* Logo/Brand */}

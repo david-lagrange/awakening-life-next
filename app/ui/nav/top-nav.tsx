@@ -166,8 +166,15 @@ export default function TopNav() {
     );
   }
 
+  // Add this function to determine if the current page should have transparent nav
+  const shouldUseTransparentNav = () => {
+    // Pages with gradient backgrounds that would benefit from transparent nav
+    const transparentNavPages = ['/', '/auth/create-account', '/auth/login'];
+    return transparentNavPages.includes(pathname);
+  };
+
   // Only conditionally render based on client-side state when we're on the client
-  if (isHomePage && !isMobile && isClient) {
+  if (shouldUseTransparentNav() && !isMobile && isClient) {
     return (
       <nav className="absolute w-full z-20 pt-4">
         <div className="w-full px-4 md:px-20">
@@ -179,7 +186,12 @@ export default function TopNav() {
               </Link>
             </div>
 
-            {/* Minimal sign in button and theme toggle */}
+            {/* Desktop Navigation Links - Add these for consistent navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              <DesktopNavLinks />
+            </div>
+
+            {/* Sign in button and theme toggle */}
             <div className="flex items-center space-x-4">
               {status === 'loading' ? (
                 <div className="text-gray-600 dark:text-gray-400">Loading...</div>
@@ -208,10 +220,10 @@ export default function TopNav() {
 
   // Regular navigation for all other pages or when not yet client-side rendered
   return (
-    <nav className={`relative w-full z-20 ${
-      isHomePage && isMobile && isClient
+    <nav className={`sticky top-0 w-full z-20 transition-colors duration-300 ${
+      shouldUseTransparentNav() && isMobile && isClient
         ? 'bg-transparent dark:bg-transparent border-transparent dark:border-transparent' 
-        : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
+        : 'bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/70 dark:border-gray-700/70'
     }`}>
       <div className="w-full px-4 md:px-20">
         <div className="flex justify-between h-16 items-center">

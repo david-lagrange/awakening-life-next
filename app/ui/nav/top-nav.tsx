@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ThemeToggle } from '@/app/lib/theme/theme-toggle';
 import { useSession } from 'next-auth/react';
 import { signOutAction } from '@/app/lib/actions/auth/login-actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 type Link = {
     href?: string;
@@ -54,6 +54,8 @@ export default function TopNav() {
   const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -145,6 +147,47 @@ export default function TopNav() {
     );
   }
 
+  // If we're on the home page and not on mobile, show minimal header
+  if (isHomePage && typeof window !== 'undefined' && window.innerWidth >= 768) {
+    return (
+      <nav className="absolute w-full z-20 pt-4">
+        <div className="w-full px-4 md:px-20">
+          <div className="flex justify-between items-center">
+            {/* Logo/Brand - now showing the Awakening Life text */}
+            <div className="flex-shrink-0">
+              <Link href="/" className="text-gray-800 dark:text-gray-50 font-semibold text-lg">
+                Awakening Life
+              </Link>
+            </div>
+
+            {/* Minimal sign in button and theme toggle */}
+            <div className="flex items-center space-x-4">
+              {status === 'loading' ? (
+                <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+              ) : session ? (
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
+                >
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
+                >
+                  Sign in
+                </Link>
+              )}
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // Regular navigation for all other pages
   return (
     <nav className="relative w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-20">
       <div className="w-full px-4 md:px-20">

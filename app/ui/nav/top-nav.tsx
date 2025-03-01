@@ -51,13 +51,12 @@ export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openMobileDropdownIndex, setOpenMobileDropdownIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false); // Changed default to false
-  const [isClient, setIsClient] = useState(false); // Add this to track client-side rendering
+  const [isMobile, setIsMobile] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const isHomePage = pathname === '/';
 
   // Add useEffect to handle window resize and initial check
   useEffect(() => {
@@ -91,10 +90,6 @@ export default function TopNav() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // console.log('Navigation Session Proof')
-  // console.log('Navigation: Session status:', status);
-  // console.log('Navigation: User:', session?.user);
-
   const handleSignOut = async () => {
     await signOutAction();
     router.push('/redirects/logout');
@@ -116,17 +111,17 @@ export default function TopNav() {
                 >
                   <button
                     onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
-                    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors"
+                    className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
                   >
                     {link.label}
                   </button>
                   {openDropdownIndex === index && (
-                    <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                    <div className="absolute top-full right-0 mt-2 w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md shadow-lg py-1 z-50 border border-gray-200/50 dark:border-gray-700/50">
                       {link.dropdownLinks.map((dropdownLink, dropdownIndex) => (
                         <Link
                           key={dropdownIndex}
                           href={dropdownLink.href}
-                          className="block px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center group"
+                          className="block px-4 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors flex items-center group"
                           onClick={() => setOpenDropdownIndex(null)}
                         >
                           {dropdownLink.dot && (
@@ -148,7 +143,7 @@ export default function TopNav() {
               <Link
                 key={index}
                 href={link.href!}
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors flex items-center group"
+                className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors flex items-center group"
               >
                 {link.dot && (
                   <span 
@@ -166,67 +161,11 @@ export default function TopNav() {
     );
   }
 
-  // Add this function to determine if the current page should have transparent nav
-  const shouldUseTransparentNav = () => {
-    // Pages with gradient backgrounds that would benefit from transparent nav
-    const transparentNavPages = ['/', '/auth/create-account', '/auth/login'];
-    return transparentNavPages.includes(pathname);
-  };
-
-  // Only conditionally render based on client-side state when we're on the client
-  if (shouldUseTransparentNav() && !isMobile && isClient) {
-    return (
-      <nav className="absolute w-full z-20 pt-4">
-        <div className="w-full px-4 md:px-20">
-          <div className="flex justify-between items-center">
-            {/* Logo/Brand - now showing the Awakening Life text */}
-            <div className="flex-shrink-0">
-              <Link href="/" className="text-gray-800 dark:text-gray-50 font-semibold text-lg">
-                Awakening Life
-              </Link>
-            </div>
-
-            {/* Desktop Navigation Links - Add these for consistent navigation */}
-            <div className="hidden md:flex items-center space-x-6">
-              <DesktopNavLinks />
-            </div>
-
-            {/* Sign in button and theme toggle */}
-            <div className="flex items-center space-x-4">
-              {status === 'loading' ? (
-                <div className="text-gray-600 dark:text-gray-400">Loading...</div>
-              ) : session ? (
-                <button
-                  onClick={handleSignOut}
-                  className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
-                >
-                  Sign out
-                </button>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
-                >
-                  Sign in
-                </Link>
-              )}
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
-  // Regular navigation for all other pages or when not yet client-side rendered
+  // Use the new transparent design for all pages
   return (
-    <nav className={`sticky top-0 w-full z-20 transition-colors duration-300 ${
-      shouldUseTransparentNav() && isMobile && isClient
-        ? 'bg-transparent dark:bg-transparent border-transparent dark:border-transparent' 
-        : 'bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/70 dark:border-gray-700/70'
-    }`}>
+    <nav className="absolute w-full z-20 pt-4">
       <div className="w-full px-4 md:px-20">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between items-center py-2">
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-gray-800 dark:text-gray-50 font-semibold text-lg">
@@ -235,27 +174,29 @@ export default function TopNav() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-6 items-center">
+          <div className="hidden md:flex items-center space-x-6">
             <DesktopNavLinks />
-            <div className="hidden md:flex items-center space-x-4">
+            
+            {/* Auth and Theme Toggle */}
+            <div className="flex items-center space-x-4">
               {status === 'loading' ? (
-                <div>Loading...</div>
+                <div className="text-gray-600 dark:text-gray-400">Loading...</div>
               ) : session ? (
-                <>
-                  <span className="text-gray-600 dark:text-gray-400">
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">
                     {session.user?.email}
                   </span>
                   <button
                     onClick={handleSignOut}
-                    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
                   >
                     Sign out
                   </button>
-                </>
+                </div>
               ) : (
                 <Link
                   href="/auth/login"
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                  className="px-4 py-2 rounded-md bg-white/10 backdrop-blur-sm border border-gray-200/20 text-gray-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
                 >
                   Sign in
                 </Link>
@@ -265,10 +206,11 @@ export default function TopNav() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden ml-auto">
+          <div className="md:hidden ml-auto flex items-center space-x-4">
+            <ThemeToggle />
             <button
               onClick={toggleMenu}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 focus:outline-none"
+              className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none"
             >
               <svg
                 className="h-6 w-6"
@@ -291,7 +233,7 @@ export default function TopNav() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div className="md:hidden mt-2 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {links.map((link, index) => {
                 if (link.dropdownLinks) {
@@ -300,7 +242,7 @@ export default function TopNav() {
                       <div key={index}>
                         <button
                           onClick={() => setOpenMobileDropdownIndex(openMobileDropdownIndex === index ? null : index)}
-                          className="w-full text-left px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                          className="w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-md transition-colors"
                         >
                           {link.label}
                         </button>
@@ -310,7 +252,7 @@ export default function TopNav() {
                               <Link
                                 key={dropdownIndex}
                                 href={dropdownLink.href}
-                                className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors flex items-center group"
+                                className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-md transition-colors flex items-center group"
                                 onClick={() => setIsMenuOpen(false)}
                               >
                                 {dropdownLink.dot && (
@@ -332,7 +274,7 @@ export default function TopNav() {
                     <Link
                       key={index}
                       href={link.href!}
-                      className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors flex items-center group"
+                      className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-md transition-colors flex items-center group"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {link.dot && (
@@ -347,18 +289,18 @@ export default function TopNav() {
                 }
                 return null;
               })}
-              <div className="mx-4 my-2 border-t border-gray-200 dark:border-gray-700"></div>
+              <div className="mx-4 my-2 border-t border-gray-200/50 dark:border-gray-700/50"></div>
               {/* Add authentication controls */}
               {status === 'loading' ? (
-                <div className="px-3 py-2 text-gray-600 dark:text-gray-400">Loading...</div>
+                <div className="px-3 py-2 text-gray-700 dark:text-gray-300">Loading...</div>
               ) : session ? (
                 <>
-                  <div className="px-3 py-2 text-gray-600 dark:text-gray-400">
+                  <div className="px-3 py-2 text-gray-700 dark:text-gray-300">
                     {session.user?.email}
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                    className="w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-md transition-colors"
                   >
                     Sign out
                   </button>
@@ -366,15 +308,12 @@ export default function TopNav() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-md transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign in
                 </Link>
               )}
-              <div className="px-3 py-2 flex justify-center">
-                <ThemeToggle />
-              </div>
             </div>
           </div>
         )}

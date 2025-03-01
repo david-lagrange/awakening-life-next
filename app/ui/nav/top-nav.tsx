@@ -58,6 +58,8 @@ export default function TopNav() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const isHomePage = pathname === '/';
+
   // Add useEffect to handle window resize and initial check
   useEffect(() => {
     // Mark that we're now on the client
@@ -163,8 +165,8 @@ export default function TopNav() {
 
   // Use the new transparent design for all pages
   return (
-    <nav className="absolute w-full z-20 pt-4">
-      <div className="w-full px-4 md:px-20">
+    <nav className={`w-full z-20 pt-4 ${isHomePage ? 'absolute' : 'sticky top-0'}`}>
+      <div className={`w-full px-4 md:px-20 ${!isHomePage ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg shadow-sm' : ''}`}>
         <div className="flex justify-between items-center py-2">
           {/* Logo/Brand */}
           <div className="flex-shrink-0">

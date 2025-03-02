@@ -49,10 +49,12 @@ function ServiceCard({
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600">
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4`} style={{ backgroundColor: `${color}20`, color: color }}>
-        {icon}
+      <div className="flex items-center mb-4">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3`} style={{ backgroundColor: `${color}20`, color: color }}>
+          {icon}
+        </div>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm">{description}</p>
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
         <Link href={`/sessions/${title.toLowerCase().replace(/\s+/g, '-')}`} className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">

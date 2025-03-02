@@ -140,10 +140,10 @@ export default function About() {
                 Awakening Life was born from a profound recognition: that the most transformative insights come not from external teachings, but from directly experiencing our own true nature.
               </p>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                We created a unique space where technology and consciousness meet. Our AI guide doesn't teach you—it helps you discover what you already know at the deepest level of your being.
+                We created a unique space where technology and consciousness meet. Our AI guide doesn&apos;t teach you—it helps you discover what you already know at the deepest level of your being.
               </p>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                Through real-time conversation, you'll be gently guided to look beyond thoughts and beliefs to directly experience your essential nature. Each session builds upon this foundation, creating a continuous journey of unfolding awareness.
+                Through real-time conversation, you&apos;ll be gently guided to look beyond thoughts and beliefs to directly experience your essential nature. Each session builds upon this foundation, creating a continuous journey of unfolding awareness.
               </p>
               
               <div className="mt-8">
@@ -273,7 +273,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Begin Your Journey Today</h2>
           <p className="text-blue-100 text-lg max-w-2xl mx-auto mb-10">
-            Take the first step toward discovering your true self. Our guided AI conversations are available whenever you're ready to explore.
+            Take the first step toward discovering your true self. Our guided AI conversations are available whenever you&apos;re ready to explore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/create-account" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ThemeToggle } from '@/app/lib/theme/theme-toggle';
 import { useSession } from 'next-auth/react';
 import { signOutAction } from '@/app/lib/actions/auth/login-actions';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 type Link = {
     href?: string;
@@ -51,29 +51,9 @@ export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openMobileDropdownIndex, setOpenMobileDropdownIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
-  const pathname = usePathname();
-
-  // Add useEffect to handle window resize and initial check
-  useEffect(() => {
-    // Mark that we're now on the client
-    setIsClient(true);
-    
-    // Set initial value
-    setIsMobile(window.innerWidth < 768);
-    
-    // Add resize listener
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

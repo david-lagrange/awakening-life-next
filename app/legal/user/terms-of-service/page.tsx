@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terms of Service | Awakening Life',
     description: 'Terms and conditions for using the Awakening Life platform for self-realization and guided AI sessions.',
-    url: 'https://awakeninglife.com/legal/user/terms-of-service',
+    url: 'https://awakeninglife.ai/legal/user/terms-of-service',
     type: 'website',
   },
 };
@@ -289,7 +289,7 @@ export default function TermsOfService() {
                   If you have any questions about these Terms of Service, please contact us at:
                 </p>
                 <p className="font-medium">
-                  legal@awakeninglife.com
+                  legal@awakeninglife.ai
                 </p>
               </div>
             </section>

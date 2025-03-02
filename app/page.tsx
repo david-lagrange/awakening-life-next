@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Awakening Life | Journey to Self-Realization',
     description: 'Embark on a guided journey to total realization of self through AI-powered conversations that reveal your true nature and potential.',
-    url: 'https://awakeninglife.com',
+    url: 'https://awakeninglife.ai',
     type: 'website',
     images: [{
       url: '/home-og-image.jpg',

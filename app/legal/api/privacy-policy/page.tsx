@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'API Privacy Policy | Awakening Life',
     description: 'Privacy policy for developers using the Awakening Life API, detailing how API data is collected, used, and protected.',
-    url: 'https://awakeninglife.com/legal/api/privacy-policy',
+    url: 'https://awakeninglife.ai/legal/api/privacy-policy',
     type: 'website',
   },
 };
@@ -339,7 +339,7 @@ export default function APIPrivacyPolicy() {
                 </ul>
                 
                 <p className="mt-4">
-                  To exercise these rights, please contact us at api-privacy@awakeninglife.com. We will respond to your request within 
+                  To exercise these rights, please contact us at api-privacy@awakeninglife.ai. We will respond to your request within 
                   the timeframe required by applicable law.
                 </p>
                 <p>
@@ -358,7 +358,7 @@ export default function APIPrivacyPolicy() {
                   If you have any questions, concerns, or requests regarding this API Privacy Policy or our privacy practices, please contact us at:
                 </p>
                 <p className="font-medium">
-                  api-privacy@awakeninglife.com
+                  api-privacy@awakeninglife.ai
                 </p>
                 <p>
                   We are committed to working with you to obtain a fair resolution of any complaint or concern about privacy.

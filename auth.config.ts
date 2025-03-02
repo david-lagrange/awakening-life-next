@@ -57,6 +57,8 @@ export const authConfig = {
       const protectedPaths = [
         '/protected-path',
         '/account',
+        '/dashboard',
+        '/sessions',
         ...contemplatorAuthorization.paths,
         // Add more protected paths as needed
       ];

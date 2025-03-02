@@ -48,7 +48,7 @@ export default async function sitemap() {
     // Session pages that are publicly accessible
     const sessionPages = [
         {
-            url: `${baseUrl}/sessions/technique-training`,
+            url: `${baseUrl}/samples/technique-training`,
             lastModified: new Date(),
         }
     ];

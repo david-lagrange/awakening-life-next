@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/app/lib/providers/theme-provider';
 import { auth } from '@/auth';
 import { SessionProvider } from 'next-auth/react';
 import { RealtimeApiProvider } from '@/app/contexts/realtime-api-context';
-// import Footer from '@/app/ui/footer/footer';
+import Footer from '@/app/ui/footer/footer';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://somedomain.com'),
@@ -95,7 +95,7 @@ export default async function RootLayout(props: {
                 {props.children}
                 {props.modal}
               </div>
-              {/* <Footer /> */}
+              <Footer />
             </ThemeProvider>
           </SessionProvider>
         </RealtimeApiProvider>

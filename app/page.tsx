@@ -168,7 +168,7 @@ export default function Home() {
             />
             <CorePrinciple 
               title="Communication" 
-              description="Express your experiences authentically, enabling deeper understanding through the act of articulation."
+              description="Express your experiences honestly and directly, allowing for the clearing of blocks and beliefs through authentic articulation of what is real for you now."
               icon={<ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
             />
             <CorePrinciple 

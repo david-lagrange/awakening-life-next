@@ -25,7 +25,7 @@ export default function WaitlistForm() {
   };
 
   return (
-    <div className={`${state.success ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/30' : 'bg-white/80 dark:bg-gray-800/80 border-transparent'} backdrop-blur-sm rounded-lg p-4 w-full`}>
+    <div className={`${state.success ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/30 flex items-center justify-center' : 'bg-white/80 dark:bg-gray-800/80 border-transparent'} backdrop-blur-sm rounded-lg p-4 w-full`}>
       {state.message && !state.success && (
         <div 
           className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-md"
@@ -45,7 +45,7 @@ export default function WaitlistForm() {
 
       {state.success && (
         <div 
-          className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-md"
+          className="p-3 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-md w-full"
           role="alert"
           aria-live="assertive"
         >

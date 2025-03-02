@@ -22,6 +22,10 @@ export default async function sitemap() {
         {
             url: `${baseUrl}/auth/forgot-password`,
             lastModified: new Date(),
+        },
+        {
+            url: `${baseUrl}/contact`,
+            lastModified: new Date(),
         }
     ];
 

@@ -253,7 +253,7 @@ export default function About() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-3xl">
               <TeamMember 
                 name="David Lagrange" 
-                role="Founder & Spiritual Seeker" 
+                role="Founder & Spiritual Inquirer" 
                 bio="With over 10 years of inquiry into the nature of reality, David created Awakening Life to make self-realization accessible to everyone."
                 imageSrc="https://d1944sk4pyzciq.cloudfront.net/awakening-life/david-headshot.jpg"
               />

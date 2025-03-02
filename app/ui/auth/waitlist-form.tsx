@@ -10,20 +10,6 @@ export default function WaitlistForm() {
   const [state, formAction] = useActionState(joinWaitlist, initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Create a client action that will be used with the form
-  const clientAction = async (formData: FormData) => {
-    // Set loading state
-    setIsSubmitting(true);
-    
-    try {
-      // Call the server action directly
-      return formAction(formData);
-    } finally {
-      // Reset loading state when done
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className={`${state.success ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/30 flex items-center justify-center' : 'bg-white/80 dark:bg-gray-800/80 border-transparent'} backdrop-blur-sm rounded-lg p-4 w-full`}>
       {state.message && !state.success && (

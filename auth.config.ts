@@ -88,7 +88,7 @@ export const authConfig = {
         (authState.isLoggedIn && currentPage.isOnCreateAccountPage)
       ||
         (authState.isLoggedIn && currentPage.isOnResetPasswordPage)) {
-          return Response.redirect(new URL('/', nextUrl));
+          return Response.redirect(new URL('/dashboard', nextUrl));
       }
 
       // Handle logged-in users accessing login page

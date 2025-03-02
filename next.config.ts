@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   images: {
-    domains: ['d1944sk4pyzciq.cloudfront.net'],
+    domains: ['dpp7zurk3x6wp.cloudfront.net', 'd1944sk4pyzciq.cloudfront.net'],
   },
   experimental: {
     serverActions: {

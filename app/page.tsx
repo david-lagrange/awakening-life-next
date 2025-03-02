@@ -40,12 +40,14 @@ function ServiceCard({
   title, 
   description, 
   icon, 
-  color 
+  color,
+  isAvailable = false
 }: { 
   title: string; 
   description: string; 
   icon: React.ReactNode; 
   color: string;
+  isAvailable?: boolean;
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600">
@@ -53,13 +55,26 @@ function ServiceCard({
         <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3`} style={{ backgroundColor: `${color}20`, color: color }}>
           {icon}
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+          {!isAvailable && (
+            <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 mt-1">
+              Coming Soon
+            </span>
+          )}
+        </div>
       </div>
       <p className="text-gray-600 dark:text-gray-400 text-sm">{description}</p>
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-        <Link href={`/sessions/${title.toLowerCase().replace(/\s+/g, '-')}`} className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-          Begin journey <ArrowRightIcon className="ml-1.5 w-3.5 h-3.5" />
-        </Link>
+        {isAvailable ? (
+          <Link href={`/sessions/${title.toLowerCase().replace(/\s+/g, '-')}`} className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+            Begin journey <ArrowRightIcon className="ml-1.5 w-3.5 h-3.5" />
+          </Link>
+        ) : (
+          <span className="inline-flex items-center text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+            Begin journey <ArrowRightIcon className="ml-1.5 w-3.5 h-3.5" />
+          </span>
+        )}
       </div>
     </div>
   );
@@ -181,6 +196,7 @@ export default function Home() {
               description="Explore profound koans that reveal your true nature through direct experience and guided inquiry."
               icon={<SparklesIcon className="h-6 w-6" />}
               color="#4F46E5" // Indigo
+              isAvailable={true}
             />
             <ServiceCard 
               title="Mind Clearing" 
@@ -223,7 +239,7 @@ export default function Home() {
             <div className="mb-10 lg:mb-0">
               <div className="relative rounded-2xl overflow-hidden shadow-xl">
                 <Image 
-                  src="https://d1944sk4pyzciq.cloudfront.net/images/blog/to-be-aware-blog-post-12-21-24.webp" 
+                  src="https://d1944sk4pyzciq.cloudfront.net/awakening-life/forest-void.webp" 
                   alt="Person experiencing deep meditation with Awakening Life" 
                   width={600} 
                   height={400}
@@ -321,10 +337,10 @@ export default function Home() {
             Take the first step toward discovering your true self. Our guided AI conversations are available whenever you&apos;re ready to explore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">
+            <Link href="/auth/create-account" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">
               Create Free Account
             </Link>
-            <Link href="/sessions/sample" className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">
+            <Link href="/sessions/technique-training" className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">
               Try a Sample Session
             </Link>
           </div>

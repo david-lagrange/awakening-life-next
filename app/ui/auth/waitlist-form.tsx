@@ -49,11 +49,11 @@ export default function WaitlistForm() {
           role="alert"
           aria-live="assertive"
         >
-          <div className="flex items-start">
-            <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full mr-2 mt-0.5 bg-green-200 dark:bg-green-900/30" aria-hidden="true">
+          <div className="flex items-center sm:justify-center">
+            <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full mr-2 bg-green-200 dark:bg-green-900/30" aria-hidden="true">
               <CheckCircleIcon className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
             </div>
-            <p className="text-sm text-green-800 dark:text-green-400">
+            <p className="text-sm text-green-800 dark:text-green-400 sm:text-center">
               {state.message}
             </p>
           </div>

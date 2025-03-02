@@ -34,6 +34,11 @@ const links: Link[] = [
     authRequired: true,
     dot: "#F59E0B", // Yellow color from openness page
   },
+  {
+    label: "About",
+    href: "/about",
+    authRequired: false
+  },
     {
         label: "Account",
         authRequired: true,

@@ -37,19 +37,18 @@ export const authConfig = {
         isOnSubscriberRoute: false, // Will be set below
       };
 
-      // For each feature role, add the feature role specific paths
-      const featureOneAuthorization = {
-        requiredRoles: ['Contemplation'],
-        paths: [
-          '/feature-1',
-          // Add more feature paths as needed
-        ]
-      }
 
-      const featureTwoAuthorization = {
-        requiredRoles: ['Contemplation', 'Mind Clearing', 'Deepest Vision'],
+      const contemplatorAuthorization = {
+        requiredRoles: ['Contemplation', 'Mind Clearing', 'Deepest Vision', 'Gratitude & Goals', 'Manifestation', 'Custom Journey'],
         paths: [
-          '/feature-2',
+          '/sessions/life-purpose',
+          '/sessions/gratitude',
+          '/sessions/openness',
+          '/sessions/mind-clearing',
+          '/sessions/deepest-vision',
+          '/sessions/contemplation',
+          '/sessions/manifestation',
+          '/sessions/custom-journey',
           // Add more feature paths as needed
         ]
       }
@@ -58,8 +57,7 @@ export const authConfig = {
       const protectedPaths = [
         '/protected-path',
         '/account',
-        ...featureOneAuthorization.paths,
-        ...featureTwoAuthorization.paths,
+        ...contemplatorAuthorization.paths,
         // Add more protected paths as needed
       ];
 
@@ -112,15 +110,8 @@ export const authConfig = {
 
         // Handle feature protections
         
-        if (featureOneAuthorization.paths.some(path => nextUrl.pathname.startsWith(path))) {
-          if (featureOneAuthorization.requiredRoles.every(role => authState.roles.includes(role))) {
-            return true;
-          }
-          return Response.redirect(new URL('/account/manage-subscription', nextUrl));
-        }
-
-        if (featureTwoAuthorization.paths.some(path => nextUrl.pathname.startsWith(path))) {
-          if (featureTwoAuthorization.requiredRoles.every(role => authState.roles.includes(role))) {
+        if (contemplatorAuthorization.paths.some(path => nextUrl.pathname.startsWith(path))) {
+          if (contemplatorAuthorization.requiredRoles.every(role => authState.roles.includes(role))) {
             return true;
           }
           return Response.redirect(new URL('/account/manage-subscription', nextUrl));

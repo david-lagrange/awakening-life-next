@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { register, RegisterState } from '@/app/lib/actions/auth/register-actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { EyeIcon, EyeSlashIcon, UserPlusIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, UserPlusIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 export default function CreateAccountForm() {
   const router = useRouter();
@@ -15,6 +15,7 @@ export default function CreateAccountForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
+    console.log(isSubmitting);
     setIsSubmitting(true);
     await formAction(formData);
     setIsSubmitting(false);
@@ -33,6 +34,21 @@ export default function CreateAccountForm() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white" id="create-account-heading">
           Create Your Account
         </h2>
+      </div>
+
+      {/* Development Banner */}
+      <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md animate-fadeIn">
+        <div className="flex items-start">
+          <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 mr-2.5 mt-0.5" aria-hidden="true">
+            <InformationCircleIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Account Creation Paused</p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              We&apos;re currently in development. Account creation will be available soon. Thank you for your patience.
+            </p>
+          </div>
+        </div>
       </div>
 
       {state.message && (
@@ -194,15 +210,13 @@ export default function CreateAccountForm() {
         <button
           type="submit"
           className="w-full flex justify-center items-center py-2.5 px-4 
-            border border-blue-300 dark:border-blue-800 text-sm font-medium rounded-md 
-            text-blue-800 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20
-            hover:bg-blue-200 dark:hover:bg-blue-900/30 focus:outline-none focus:ring-2 
-            focus:ring-blue-500/40 disabled:opacity-40 disabled:cursor-not-allowed 
-            disabled:hover:bg-blue-100 dark:disabled:hover:bg-blue-900/20 transition-colors"
-          disabled={isSubmitting}
-          aria-busy={isSubmitting}
+            border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md 
+            text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800
+            cursor-not-allowed opacity-70 transition-colors"
+          disabled={true}
+          aria-disabled="true"
         >
-          {isSubmitting ? 'Creating Account...' : 'Create Account'}
+          Account Creation Unavailable
         </button>
       </form>
     </div>

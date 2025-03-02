@@ -73,9 +73,9 @@ export default function CreateAccountPage() {
           </p>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-8 justify-center items-start md:items-stretch">
-          {/* Left side - Benefits (reversed from previous layout) */}
-          <div className="w-full md:w-auto md:min-w-[400px] md:max-w-[500px] md:flex md:flex-col order-2 md:order-1">
+        <div className="flex flex-col md:flex-row gap-8 justify-center items-start">
+          {/* Left side - Benefits */}
+          <div className="w-full md:w-auto md:min-w-[400px] md:max-w-[500px] order-2 md:order-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 p-6 h-full">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Your Journey Begins Here</h2>
               
@@ -104,13 +104,12 @@ export default function CreateAccountPage() {
             </div>
           </div>
           
-          {/* Right side - Form (reversed from previous layout) */}
-          <div className="w-full md:w-auto md:min-w-[400px] md:flex md:flex-col order-1 md:order-2">
-            <div className="flex-grow">
-              <CreateAccountForm />
-            </div>
+          {/* Right side - Form with "Already have an account" text */}
+          <div className="w-full md:w-auto md:min-w-[400px] order-1 md:order-2 flex flex-col">
+            <CreateAccountForm />
             
-            <div className="mt-6 text-center">
+            {/* "Already have an account" inside the form container for mobile */}
+            <div className="mt-6 text-center md:hidden">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{' '}
                 <Link href="/auth/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
@@ -119,6 +118,16 @@ export default function CreateAccountPage() {
               </p>
             </div>
           </div>
+        </div>
+        
+        {/* "Already have an account" outside the flex container - visible only on desktop */}
+        <div className="mt-6 text-center hidden md:block">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </main>

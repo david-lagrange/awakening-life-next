@@ -18,19 +18,19 @@ type Link = {
 const links: Link[] = [
   {
     label: "Life Purpose",
-    href: "/life-purpose",
+    href: "/sessions/life-purpose",
     authRequired: true,
     dot: "#3B82F6", // Blue color from life-purpose page
   },
   {
     label: "Gratitude",
-    href: "/gratitude",
+    href: "/sessions/gratitude",
     authRequired: true,
     dot: "#10B981", // Emerald color from gratitude page
   },
   {
     label: "Openness",
-    href: "/openness",
+    href: "/sessions/openness",
     authRequired: true,
     dot: "#F59E0B", // Yellow color from openness page
   },
@@ -57,8 +57,6 @@ export default function TopNav() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-
-  const isHomePage = pathname === '/';
 
   // Add useEffect to handle window resize and initial check
   useEffect(() => {
@@ -165,8 +163,8 @@ export default function TopNav() {
 
   // Use the new transparent design for all pages
   return (
-    <nav className={`w-full z-20 pt-4 ${isHomePage ? 'absolute' : 'sticky top-0'}`}>
-      <div className={`w-full px-4 md:px-20 ${!isHomePage ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg shadow-sm' : ''}`}>
+    <nav className="w-full z-20 pt-4 absolute">
+      <div className="w-full px-4 md:px-20">
         <div className="flex justify-between items-center py-2">
           {/* Logo/Brand */}
           <div className="flex-shrink-0">

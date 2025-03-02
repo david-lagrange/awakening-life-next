@@ -91,13 +91,13 @@ function TeamMember({
 
 export default function About() {
   return (
-    <main className="min-h-screen dark:bg-gray-900">
+    <main className="-mt-16 md:-mt-20 min-h-screen dark:bg-gray-900">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-16 sm:pt-32 sm:pb-24">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-100 to-white dark:from-gray-800 dark:to-gray-900 z-0"></div>
         <div className="absolute inset-0 z-10 bg-[url('/patterns/subtle-dots.svg')] opacity-30 dark:opacity-10"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 pt-16">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white tracking-tight">
               Our <span className="text-blue-600 dark:text-blue-400">Mission</span>

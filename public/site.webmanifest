@@ -1,6 +1,8 @@
 {
     "name": "Awakening Life",
-    "short_name": "Awakening Life",
+    "short_name": "Awakening",
+    "description": "AI-guided sessions for self-realization and personal growth",
+    "start_url": "/",
     "icons": [
       {
         "src": "/android-chrome-192x192.png",
@@ -11,9 +13,18 @@
         "src": "/android-chrome-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
+      },
+      {
+        "src": "/maskable-icon.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
       }
     ],
-    "theme_color": "#ffffff",
+    "theme_color": "#3B82F6",
     "background_color": "#ffffff",
-    "display": "standalone"
-  } 
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "categories": ["productivity", "lifestyle", "health"]
+} 

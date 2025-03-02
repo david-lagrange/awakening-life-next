@@ -1,0 +1,11 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow private/authenticated routes
+Disallow: /account/
+Disallow: /dashboard/
+Disallow: /auth/reset-password/
+
+# Sitemap location
+Sitemap: https://awakeninglife.ai/sitemap.xml 

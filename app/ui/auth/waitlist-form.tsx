@@ -117,7 +117,7 @@ export default function WaitlistForm() {
       
       {!state.success && (
         <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center sm:text-left">
-          We'll notify you when Awakening Life is ready for beta testing.
+          We&apos;ll notify you when Awakening Life is ready for beta testing.
         </p>
       )}
     </div>

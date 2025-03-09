@@ -148,7 +148,7 @@ export default function TopNav() {
 
   // Use the new transparent design for all pages
   return (
-    <nav className="w-full z-20 pt-4 absolute">
+    <nav className="w-full z-50 pt-4 absolute">
       <div className="w-full px-4 md:px-20">
         <div className="flex justify-between items-center py-2">
           {/* Logo/Brand */}
@@ -218,7 +218,7 @@ export default function TopNav() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden mt-2 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
+          <div className="md:hidden mt-2 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-lg z-50 relative">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {links.map((link, index) => {
                 if (link.dropdownLinks) {

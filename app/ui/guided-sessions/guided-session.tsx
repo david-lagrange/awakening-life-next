@@ -5,7 +5,7 @@ import ChatComponent, { Message } from "@/app/ui/guided-sessions/chat-component"
 import SessionControls from "@/app/ui/guided-sessions/session-controls";
 import { AudioCaptureService } from "@/app/lib/services/audio-capture";
 import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/transcription";
-import { sendMessagesToLLM } from "@/app/lib/services/agent-actions";
+import { sendMessagesToLLM } from "@/app/lib/actions/agent/agent-actions";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues

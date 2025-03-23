@@ -223,29 +223,6 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
         
         {/* Chat messages */}
         <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50">
-          {/* Show current transcription or Listening indicator */}
-          {((transcription && transcription.trim().length > 0) || isSpeechDetected) && (
-            <div className="flex justify-end">
-              <div className="max-w-[85%] rounded-lg px-4 py-3 shadow-sm bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800">
-                {transcription && transcription.trim().length > 0 && (
-                  <div className="whitespace-pre-wrap text-sm">{transcription}</div>
-                )}
-                {isSpeechDetected && (
-                  <div className={`flex justify-end ${transcription ? 'mt-1.5' : ''}`}>
-                    <div className="flex items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400 mr-2">Listening...</span>
-                      <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse"></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-150"></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-300"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
           {/* Show past messages with timestamps */}
           {messages.map((message, index) => (
             <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -272,6 +249,29 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
               </div>
             </div>
           ))}
+          
+          {/* Show current transcription or Listening indicator - moved after messages */}
+          {((transcription && transcription.trim().length > 0) || isSpeechDetected) && (
+            <div className="flex justify-end">
+              <div className="max-w-[85%] rounded-lg px-4 py-3 shadow-sm bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800">
+                {transcription && transcription.trim().length > 0 && (
+                  <div className="whitespace-pre-wrap text-sm">{transcription}</div>
+                )}
+                {isSpeechDetected && (
+                  <div className={`flex justify-end ${transcription ? 'mt-1.5' : ''}`}>
+                    <div className="flex items-center">
+                      <span className="text-xs text-gray-600 dark:text-gray-400 mr-2">Listening...</span>
+                      <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-300"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           
           {/* Only show "No messages yet" when showEmptyState is true and never detected speech */}
           {showEmptyState && !hasDetectedSpeech && messages.length === 0 && !transcription && !isSpeechDetected && (

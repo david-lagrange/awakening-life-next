@@ -53,7 +53,7 @@ export default function GuidedSession() {
           setTranscription(""); // Clear the transcription for the next speech segment
           
           // Get response
-          simulateAssistantResponse(fullTranscript.trim());
+          simulateAssistantResponse();
         }
       },
       onError: (message) => {
@@ -88,7 +88,7 @@ export default function GuidedSession() {
   }, []);
   
   // Simulate assistant response (this would be replaced with actual API call)
-  const simulateAssistantResponse = async (userMessage: string) => {
+  const simulateAssistantResponse = async () => {
     // First add a pending message to UI
     const pendingMessage: Message = {
       role: 'assistant',
@@ -169,7 +169,7 @@ export default function GuidedSession() {
     });
     
     // Simulate response
-    simulateAssistantResponse(message);
+    simulateAssistantResponse();
   };
   
   // Start capturing audio and sending to transcription service

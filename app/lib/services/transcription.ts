@@ -45,10 +45,10 @@ export class TranscriptionService {
       this.ws.onclose = this.handleClose.bind(this);
       this.ws.onerror = this.handleError.bind(this);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("🔴 [Transcription] Error setting up WebSocket:", error);
       this.setStatus('error');
-      this.events.onError(`Error: ${error.message || "Unknown error"}`);
+      this.events.onError(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 

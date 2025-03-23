@@ -39,7 +39,6 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const resizeHandleRef = useRef<HTMLDivElement>(null);
-  const emptyStateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Detect mobile screen size
   useEffect(() => {

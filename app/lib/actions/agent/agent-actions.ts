@@ -21,7 +21,7 @@ export async function sendMessagesToLLM(messages: SimpleMessage[]) {
     console.log("Messages received:", messages.map(m => `${m.role}: ${m.content.substring(0, 30)}...`));
 
     // Prepend a system message if needed
-    let formattedMessages = [...messages]; // Clone to avoid modifying the input
+    const formattedMessages = [...messages]; // Clone to avoid modifying the input
 
     // Add system message if needed
     if (!formattedMessages.some(msg => msg.role === 'system')) {

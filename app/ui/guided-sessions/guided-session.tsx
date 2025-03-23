@@ -5,7 +5,7 @@ import ChatComponent, { Message } from "@/app/ui/guided-sessions/chat-component"
 import SessionControls from "@/app/ui/guided-sessions/session-controls";
 import { AudioCaptureService } from "@/app/lib/services/audio-capture";
 import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/transcription";
-import { sendMessagesToLLM } from "@/app/lib/actions/agent/agent-actions";
+import { agentProcessMessages } from "@/app/lib/actions/agent/agent-actions";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues
@@ -104,7 +104,7 @@ export default function GuidedSession() {
       console.log("Sending conversation history to LLM:", conversationHistory);
       
       // Call LLM with simplified conversation history objects
-      const response = await sendMessagesToLLM(
+      const response = await agentProcessMessages(
         // Convert to simple objects that will serialize properly
         conversationHistory.map(msg => ({
           role: msg.role,

@@ -10,7 +10,7 @@ interface SimpleMessage {
 }
 
 // Server action to send messages to the LLM and get responses
-export async function sendMessagesToLLM(messages: SimpleMessage[]) {
+export async function agentProcessMessages(messages: SimpleMessage[]) {
   try {
     // Initialize OpenAI client (only on server)
     const openai = new OpenAI({

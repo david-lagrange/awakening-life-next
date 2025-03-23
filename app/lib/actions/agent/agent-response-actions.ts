@@ -10,11 +10,11 @@ interface SimpleMessage {
   content: string;
 }
 
-// Type for voice settings
-interface VoiceSettings {
-  voice: string;
-  instructions: string;
-}
+// // Type for voice settings
+// interface VoiceSettings {
+//   voice: string;
+//   instructions: string;
+// }
 
 // Available voices from OpenAI
 type OpenAIVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'coral' | 'sage' | 'ash';
@@ -34,6 +34,9 @@ export async function convertResponseToSpeech(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    console.log("🔷 [convertResponseToSpeech] textResponse:", textResponse);
+    console.log("🔷 [convertResponseToSpeech] conversationHistory:", conversationHistory);
+    console.log("🔷 [convertResponseToSpeech] voicePreference:", voicePreference);
     // Step 1: Determine appropriate voice settings based on conversation context
     // const voiceSettings = await determineVoiceSettings(
     //   textResponse, 
@@ -86,65 +89,65 @@ export async function convertResponseToSpeech(
  * based on the response content and conversation history,
  * but uses the user-specified voice if provided
  */
-async function determineVoiceSettings(
-  textResponse: string,
-  conversationHistory: SimpleMessage[],
-  preferredVoice?: OpenAIVoice
-): Promise<VoiceSettings> {
-  try {
-    // Use the user's preferred voice if provided
-    const voice = preferredVoice || "nova"; // Default to "nova" if not specified
+// async function determineVoiceSettings(
+//   textResponse: string,
+//   conversationHistory: SimpleMessage[],
+//   preferredVoice?: OpenAIVoice
+// ): Promise<VoiceSettings> {
+//   try {
+//     // Use the user's preferred voice if provided
+//     const voice = preferredVoice || "nova"; // Default to "nova" if not specified
     
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+//     const openai = new OpenAI({
+//       apiKey: process.env.OPENAI_API_KEY,
+//     });
 
-    // Create a prompt for the LLM to analyze the conversation and suggest instructions only
-    const voiceAnalysisMessages = [
-      {
-        role: "system" as const,
-        content: `Analyze the following conversation and the assistant's response. 
-          The voice "${voice}" has already been selected.
-          Provide detailed instructions for tone, emotion, speed, and other vocal characteristics
-          that would make this response sound natural and appropriate for the conversation.
-          Respond with just the instructions text.`
-      },
-      {
-        role: "user" as const,
-        content: `Conversation history:
-          ${JSON.stringify(conversationHistory)}
+//     // Create a prompt for the LLM to analyze the conversation and suggest instructions only
+//     const voiceAnalysisMessages = [
+//       {
+//         role: "system" as const,
+//         content: `Analyze the following conversation and the assistant's response. 
+//           The voice "${voice}" has already been selected.
+//           Provide detailed instructions for tone, emotion, speed, and other vocal characteristics
+//           that would make this response sound natural and appropriate for the conversation.
+//           Respond with just the instructions text.`
+//       },
+//       {
+//         role: "user" as const,
+//         content: `Conversation history:
+//           ${JSON.stringify(conversationHistory)}
           
-          Assistant's response to convert to speech:
-          "${textResponse}"
+//           Assistant's response to convert to speech:
+//           "${textResponse}"
           
-          Based on this context, what instructions would create the most natural and appropriate speech?`
-      }
-    ];
+//           Based on this context, what instructions would create the most natural and appropriate speech?`
+//       }
+//     ];
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: voiceAnalysisMessages
-    });
+//     const completion = await openai.chat.completions.create({
+//       model: "gpt-4o",
+//       messages: voiceAnalysisMessages
+//     });
 
-    const instructions = completion.choices[0].message.content || 
-      "Speak in a natural, conversational tone with moderate pacing.";
+//     const instructions = completion.choices[0].message.content || 
+//       "Speak in a natural, conversational tone with moderate pacing.";
 
-    console.log("Voice Instructions:", instructions);
+//     console.log("Voice Instructions:", instructions);
 
-    return {
-      voice,
-      instructions
-    };
-  } catch (error) {
-    console.error("Error determining voice settings:", error);
+//     return {
+//       voice,
+//       instructions
+//     };
+//   } catch (error) {
+//     console.error("Error determining voice settings:", error);
     
-    // Return default settings with the preferred voice in case of error
-    return {
-      voice: preferredVoice || "nova",
-      instructions: "Speak in a natural, conversational tone with moderate pacing."
-    };
-  }
-}
+//     // Return default settings with the preferred voice in case of error
+//     return {
+//       voice: preferredVoice || "nova",
+//       instructions: "Speak in a natural, conversational tone with moderate pacing."
+//     };
+//   }
+// }
 
 /**
  * Cleans up old audio files to manage storage

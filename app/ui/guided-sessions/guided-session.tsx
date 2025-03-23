@@ -24,6 +24,7 @@ export default function GuidedSession() {
   const [isSpeechDetected, setIsSpeechDetected] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatComponentRef = useRef<{ toggleChat: () => void } | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   
   // Initialize services
   useEffect(() => {
@@ -169,10 +170,52 @@ export default function GuidedSession() {
     }
   };
   
+  // Scroll to bottom of messages
+  useEffect(() => {
+    // Only scroll if messages changed AND chat is open
+    if (isChatOpen && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, transcription, isChatOpen]);
+  
+  // Handle body scroll locking when chat is open on mobile
+  useEffect(() => {
+    // Only apply scroll locking on mobile
+    if (typeof window !== 'undefined') {
+      const html = document.documentElement;
+      const body = document.body;
+      
+      if (isChatOpen) {
+        // Save the current scroll position
+        const scrollY = window.scrollY;
+        
+        // Add styles to prevent scrolling but maintain position
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}px`;
+        body.style.width = '100%';
+        html.style.scrollBehavior = 'auto';
+        
+        return () => {
+          // Cleanup function to restore scrolling
+          body.style.position = '';
+          body.style.top = '';
+          body.style.width = '';
+          html.style.scrollBehavior = '';
+          
+          // Restore scroll position
+          window.scrollTo(0, scrollY);
+        };
+      }
+    }
+  }, [isChatOpen]);
+  
   // New function to toggle chat from parent component
   const toggleChat = () => {
     if (chatComponentRef.current) {
+      const newChatState = !isChatOpen;
       chatComponentRef.current.toggleChat();
+      // Update our local state to match the chat component's state
+      setIsChatOpen(newChatState);
     }
   };
   
@@ -183,14 +226,6 @@ export default function GuidedSession() {
   // Optional: Add a function to get all user messages for LLM call
   const getUserMessagesForLLM = () => {
     return allUserMessages.map(msg => msg.content);
-  };
-
-  const resetSession = () => {
-    setMessages([]);
-    setTranscription("");
-    // Optionally, keep allUserMessages if you need the history for the LLM
-    // or clear it if you want to start fresh:
-    // setAllUserMessages([]);
   };
 
   // Monitor speech detection state changes
@@ -208,7 +243,7 @@ export default function GuidedSession() {
         </div>
         
         {/* Status Circle - Elegant design from old component */}
-        <div className="mb-32">
+        <div className="mb-8">
           {isSessionActive ? (
             <div 
               className="w-32 h-32 rounded-full transition-all duration-300 flex items-center justify-center shadow-lg"
@@ -240,6 +275,63 @@ export default function GuidedSession() {
           )}
         </div>
         
+        {/* Move buttons closer to the circle by placing them here */}
+        <div className="mb-16 flex justify-center">
+          <div className="flex space-x-6">
+            {/* Start Session button */}
+            <div className="flex flex-col items-center">
+              <button
+                onClick={startSession}
+                disabled={isSessionActive || isLoading}
+                className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
+                  border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
+                  disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 dark:hover:bg-blue-800/40 
+                  transition-colors"
+                aria-label="Start session"
+              >
+                {isLoading ? (
+                  <ArrowPathIcon className="h-5 w-5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <MicrophoneIcon className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+              <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                {isLoading ? "Connecting..." : "Start"}
+              </span>
+            </div>
+            
+            {/* End Session button */}
+            <div className="flex flex-col items-center">
+              <button
+                onClick={stopSession}
+                disabled={!isSessionActive || isLoading}
+                className="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                  border border-red-300 dark:border-red-800 focus:outline-none focus:ring-2 focus:ring-red-500/40
+                  disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-200 dark:hover:bg-red-800/40
+                  transition-colors"
+                aria-label="End session"
+              >
+                <StopIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">End</span>
+            </div>
+            
+            {/* Chat button */}
+            <div className="flex flex-col items-center">
+              <button
+                onClick={toggleChat}
+                className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
+                  border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
+                  hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors"
+                aria-label="Toggle chat"
+              >
+                <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Chat</span>
+            </div>
+          </div>
+        </div>
+        
         {error && (
           <div className="mt-8 max-w-md bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-md p-4">
             <div className="flex items-start">
@@ -248,77 +340,6 @@ export default function GuidedSession() {
             </div>
           </div>
         )}
-      </div>
-      
-      {/* Replace the blocky buttons with elegant icon buttons */}
-      <div className="mb-4 flex justify-center">
-        <div className="flex space-x-6">
-          {/* Start Session button */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={startSession}
-              disabled={isSessionActive || isLoading}
-              className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
-                border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
-                disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 dark:hover:bg-blue-800/40 
-                transition-colors"
-              aria-label="Start session"
-            >
-              {isLoading ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" aria-hidden="true" />
-              ) : (
-                <MicrophoneIcon className="h-5 w-5" aria-hidden="true" />
-              )}
-            </button>
-            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-              {isLoading ? "Connecting..." : "Start"}
-            </span>
-          </div>
-          
-          {/* End Session button */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={stopSession}
-              disabled={!isSessionActive || isLoading}
-              className="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
-                border border-red-300 dark:border-red-800 focus:outline-none focus:ring-2 focus:ring-red-500/40
-                disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-200 dark:hover:bg-red-800/40
-                transition-colors"
-              aria-label="End session"
-            >
-              <StopIcon className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">End</span>
-          </div>
-          
-          {/* Reset Chat button */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={resetSession}
-              className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/40
-                hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              aria-label="Reset chat"
-            >
-              <ArrowPathIcon className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Reset</span>
-          </div>
-          
-          {/* Chat button */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={toggleChat}
-              className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
-                border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
-                hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors"
-              aria-label="Toggle chat"
-            >
-              <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Chat</span>
-          </div>
-        </div>
       </div>
       
       {/* Chat Component with onSendMessage handler */}

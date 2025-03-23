@@ -70,10 +70,12 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
     }
   }));
   
-  // Scroll to bottom of messages
+  // Scroll to bottom of messages only when chat is open
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, transcription]);
+    if (isChatOpen && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, transcription, isChatOpen]);
   
   // Handle resize drag
   useEffect(() => {
@@ -119,7 +121,13 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
   };
   
   const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
+    const newChatState = !isChatOpen;
+    setIsChatOpen(newChatState);
+    
+    // Only scroll if the chat is being opened
+    if (newChatState && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -177,10 +185,10 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
       
       {/* Chat sidebar */}
       <div 
-        className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
+        className={`fixed right-0 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
           transform transition-transform duration-300 ease-in-out z-50 flex flex-col
           ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}
-          ${isMobile ? 'left-0' : ''}`}
+          ${isMobile ? 'left-0 top-[4.5rem] bottom-0' : 'top-0 h-full'}`}
         style={{ width: isMobile ? '100%' : `${chatWidth}px` }}
       >
         {/* Resize handle - hidden on mobile */}
@@ -281,19 +289,19 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
         
         {/* Chat input - make it more mobile friendly */}
         <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-stretch space-x-2">
+          <div className="flex items-center space-x-2">
             <div className="flex-grow relative">
               <textarea
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
-                rows={isMobile ? 2 : 1}
+                rows={1}
                 className="w-full rounded-md border border-gray-300 dark:border-gray-600 
                   px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                   focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-transparent
-                  resize-none text-sm"
-                style={{ height: isMobile ? 'auto' : '2.5rem' }}
+                  resize-none text-sm min-h-[2.5rem] max-h-[6rem] align-middle"
+                style={{ height: '2.5rem', overflow: textInput.length > 0 ? 'auto' : 'hidden' }}
                 disabled={isProcessing}
               />
             </div>

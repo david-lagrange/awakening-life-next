@@ -1,8 +1,8 @@
 "use server";
 
 import OpenAI from "openai";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 
 // Define message types for consistency with agent-actions.ts
 interface SimpleMessage {
@@ -153,32 +153,32 @@ export async function convertResponseToSpeech(
  * Cleans up old audio files to manage storage
  * Can be called periodically or after sessions end
  */
-export async function cleanupAudioFiles(maxAgeHours: number = 24): Promise<void> {
-  try {
-    const publicDir = path.join(process.cwd(), "public", "audio-responses");
+// export async function cleanupAudioFiles(maxAgeHours: number = 24): Promise<void> {
+//   try {
+//     const publicDir = path.join(process.cwd(), "public", "audio-responses");
     
-    // Skip if directory doesn't exist
-    if (!fs.existsSync(publicDir)) {
-      return;
-    }
+//     // Skip if directory doesn't exist
+//     if (!fs.existsSync(publicDir)) {
+//       return;
+//     }
     
-    const files = await fs.promises.readdir(publicDir);
-    const now = Date.now();
-    const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+//     const files = await fs.promises.readdir(publicDir);
+//     const now = Date.now();
+//     const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
     
-    for (const file of files) {
-      if (file.startsWith('response_') && file.endsWith('.mp3')) {
-        const filePath = path.join(publicDir, file);
-        const stats = await fs.promises.stat(filePath);
+//     for (const file of files) {
+//       if (file.startsWith('response_') && file.endsWith('.mp3')) {
+//         const filePath = path.join(publicDir, file);
+//         const stats = await fs.promises.stat(filePath);
         
-        // Delete files older than maxAgeHours
-        if (now - stats.mtimeMs > maxAgeMs) {
-          await fs.promises.unlink(filePath);
-          console.log(`Deleted old audio file: ${file}`);
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error cleaning up audio files:", error);
-  }
-} 
+//         // Delete files older than maxAgeHours
+//         if (now - stats.mtimeMs > maxAgeMs) {
+//           await fs.promises.unlink(filePath);
+//           console.log(`Deleted old audio file: ${file}`);
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error cleaning up audio files:", error);
+//   }
+// } 

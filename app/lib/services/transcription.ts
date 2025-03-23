@@ -5,6 +5,8 @@ export interface TranscriptionEvents {
   onTranscriptionCompleted: (fullTranscript: string) => void;
   onError: (message: string) => void;
   onStatusChange: (status: TranscriptionStatus) => void;
+  onSpeechStarted?: () => void;
+  onSpeechStopped?: () => void;
 }
 
 export type TranscriptionStatus = 'idle' | 'connecting' | 'active' | 'error' | 'closed';
@@ -97,9 +99,15 @@ export class TranscriptionService {
           break;
         case "input_audio_buffer.speech_started":
           console.log("🟢 [Transcription] Speech started");
+          if (this.events.onSpeechStarted) {
+            this.events.onSpeechStarted();
+          }
           break;
         case "input_audio_buffer.speech_stopped":
           console.log("🟢 [Transcription] Speech stopped");
+          if (this.events.onSpeechStopped) {
+            this.events.onSpeechStopped();
+          }
           break;
         default:
           console.log(`🟠 [Transcription] Unhandled event type: ${message.type}`);

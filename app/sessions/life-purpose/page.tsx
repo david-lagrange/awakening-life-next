@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import GuidedSession from '@/app/ui/guided-sessions/guided-session';
+import GuidedSession from '@/app/ui/guided-sessions/guided-session-old';
 import { useLifePurposeFunctions } from '@/app/hooks/use-life-purpose-functions';
 
 // export const metadata = {

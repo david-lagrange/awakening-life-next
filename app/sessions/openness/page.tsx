@@ -1,4 +1,4 @@
-import GuidedSession from '@/app/ui/guided-sessions/guided-session';
+import GuidedSession from '@/app/ui/guided-sessions/guided-session-old';
 
 export const metadata = {
   title: 'Openness Guided Session',

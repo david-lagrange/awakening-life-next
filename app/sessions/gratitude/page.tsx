@@ -25,13 +25,14 @@ Keep your responses conversational, warm, and focused on helping them develop a 
   return (
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <GuidedSession
+        <GuidedSession />
+        {/* <GuidedSession
           title="Daily Gratitude Session"
           description="Cultivate gratitude and appreciation through this guided conversation."
           systemPrompt={systemPrompt}
           voice="sage" // Using a different voice for variety
           color="#10B981" // Emerald-500 color that matches the subscription display's success states
-        />
+        /> */}
       </div>
     </main>
   );

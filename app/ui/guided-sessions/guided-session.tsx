@@ -20,6 +20,8 @@ export default function GuidedSession() {
   const [transcriptionService, setTranscriptionService] = useState<TranscriptionService | null>(null);
   const [isSpeechDetected, setIsSpeechDetected] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  // Add a ref to track the current playing audio element
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const chatComponentRef = useRef<{ toggleChat: () => void } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   
@@ -71,6 +73,13 @@ export default function GuidedSession() {
       onSpeechStarted: () => {
         console.log("🔷 [GuidedSession] Speech started - updating state");
         setIsSpeechDetected(true);
+        
+        // Stop any playing audio when user starts speaking
+        if (currentAudioRef.current) {
+          console.log("🔷 [GuidedSession] Stopping audio playback because user started speaking");
+          currentAudioRef.current.pause();
+          currentAudioRef.current = null;
+        }
       },
       onSpeechStopped: () => {
         console.log("🔷 [GuidedSession] Speech stopped - updating state");
@@ -84,6 +93,12 @@ export default function GuidedSession() {
     return () => {
       stopSession();
       conversationHistory = [];
+      
+      // Also stop any playing audio
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
     };
   }, []);
   
@@ -134,6 +149,23 @@ export default function GuidedSession() {
         console.log("Tool calls from LLM:", response.toolCalls);
         // Future implementation: Execute tool calls
       }
+      
+      // NEW CODE: Convert the text response to speech and play it
+      try {
+        const { convertResponseToSpeech } = await import('@/app/lib/actions/agent/agent-response-actions');
+        const { audioBase64 } = await convertResponseToSpeech(
+          response.textResponse,
+          conversationHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        );
+        
+        // Play the audio from Base64 string
+        playResponseAudio(audioBase64);
+      } catch (error) {
+        console.error("Error converting response to speech:", error);
+      }
     } catch (error) {
       console.error("Error getting LLM response:", error);
       
@@ -147,6 +179,47 @@ export default function GuidedSession() {
             }
           : msg
       ));
+    }
+  };
+  
+  // Function to play audio response from Base64 string
+  const playResponseAudio = (audioBase64: string) => {
+    try {
+      // If there's already audio playing, stop it first
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+      }
+      
+      // Create an audio element
+      const audio = new Audio();
+      
+      // Set the audio source to a data URL with the Base64 encoded audio
+      audio.src = `data:audio/mp3;base64,${audioBase64}`;
+      
+      // Store the reference to the current audio element
+      currentAudioRef.current = audio;
+      
+      audio.addEventListener('ended', () => {
+        console.log("Audio playback completed");
+        // Clear the reference when playback ends naturally
+        currentAudioRef.current = null;
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error("Error playing audio:", e);
+        // Clear the reference on error
+        currentAudioRef.current = null;
+      });
+      
+      // Play the audio
+      audio.play()
+        .catch(error => {
+          console.error("Failed to play audio:", error);
+          currentAudioRef.current = null;
+        });
+    } catch (error) {
+      console.error("Error playing audio from Base64:", error);
+      currentAudioRef.current = null;
     }
   };
   

@@ -5,11 +5,15 @@ import ChatComponent, { Message } from "@/app/ui/guided-sessions/chat-component"
 import SessionControls from "@/app/ui/guided-sessions/session-controls";
 import { AudioCaptureService } from "@/app/lib/services/audio-capture";
 import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/transcription";
+import { sendMessagesToLLM } from "@/app/lib/services/agent-actions";
+
+// This array will store the full conversation history for LLM calls
+// It exists outside React state to avoid serialization issues
+let conversationHistory: { role: 'user' | 'assistant' | 'system', content: string }[] = [];
 
 export default function GuidedSession() {
   const [transcription, setTranscription] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [allUserMessages, setAllUserMessages] = useState<Message[]>([]); // Store all user messages for LLM call
   const [status, setStatus] = useState<TranscriptionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [audioCapture, setAudioCapture] = useState<AudioCaptureService | null>(null);
@@ -37,13 +41,19 @@ export default function GuidedSession() {
             isComplete: true
           };
           
+          // Add to React state for UI display
           setMessages(prev => [...prev, newMessage]);
-          setAllUserMessages(prev => [...prev, newMessage]); // Store for LLM call
+          
+          // Add to conversation history for LLM
+          conversationHistory.push({
+            role: 'user',
+            content: fullTranscript.trim()
+          });
+          
           setTranscription(""); // Clear the transcription for the next speech segment
           
-          // You would normally send this to an API to get a response
-          // For now, we'll simulate a response after a delay
-          simulateAssistantResponse(newMessage.content);
+          // Get response
+          simulateAssistantResponse(fullTranscript.trim());
         }
       },
       onError: (message) => {
@@ -70,15 +80,16 @@ export default function GuidedSession() {
     
     setTranscriptionService(newTranscriptionService);
     
-    // Cleanup on unmount
+    // Clean up conversation history on unmount
     return () => {
       stopSession();
+      conversationHistory = [];
     };
   }, []);
   
   // Simulate assistant response (this would be replaced with actual API call)
-  const simulateAssistantResponse = (userMessage: string) => {
-    // First add a pending message
+  const simulateAssistantResponse = async (userMessage: string) => {
+    // First add a pending message to UI
     const pendingMessage: Message = {
       role: 'assistant',
       content: '',
@@ -88,18 +99,55 @@ export default function GuidedSession() {
     
     setMessages(prev => [...prev, pendingMessage]);
     
-    // Simulate typing delay and response
-    setTimeout(() => {
+    try {
+      // Log conversation history to verify what's being sent
+      console.log("Sending conversation history to LLM:", conversationHistory);
+      
+      // Call LLM with simplified conversation history objects
+      const response = await sendMessagesToLLM(
+        // Convert to simple objects that will serialize properly
+        conversationHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      );
+      
+      // Add assistant response to conversation history
+      conversationHistory.push({
+        role: 'assistant',
+        content: response.textResponse
+      });
+      
+      // Update the UI with LLM response
       setMessages(prev => prev.map(msg => 
         !msg.isComplete && msg.role === 'assistant' 
           ? {
               ...msg,
-              content: `I received your message: "${userMessage.substring(0, 30)}${userMessage.length > 30 ? '...' : ''}"`,
+              content: response.textResponse,
               isComplete: true
             }
           : msg
       ));
-    }, 1500);
+      
+      // Handle tool calls
+      if (response.toolCalls && response.toolCalls.length > 0) {
+        console.log("Tool calls from LLM:", response.toolCalls);
+        // Future implementation: Execute tool calls
+      }
+    } catch (error) {
+      console.error("Error getting LLM response:", error);
+      
+      // Update UI with error state
+      setMessages(prev => prev.map(msg => 
+        !msg.isComplete && msg.role === 'assistant' 
+          ? {
+              ...msg,
+              content: "Sorry, I encountered an error processing your request.",
+              isComplete: true
+            }
+          : msg
+      ));
+    }
   };
   
   // Handle text message from chat component
@@ -111,10 +159,16 @@ export default function GuidedSession() {
       isComplete: true
     };
     
+    // Add to React state for UI
     setMessages(prev => [...prev, newMessage]);
-    setAllUserMessages(prev => [...prev, newMessage]);
     
-    // Simulate response for text messages too
+    // Add to conversation history for LLM
+    conversationHistory.push({
+      role: 'user',
+      content: message
+    });
+    
+    // Simulate response
     simulateAssistantResponse(message);
   };
   
@@ -211,11 +265,6 @@ export default function GuidedSession() {
     }
   };
   
-  // Optional: Add a function to get all user messages for LLM call
-  const getUserMessagesForLLM = () => {
-    return allUserMessages.map(msg => msg.content);
-  };
-
   // Monitor speech detection state changes
   useEffect(() => {
     console.log("🔷 [GuidedSession] isSpeechDetected state changed:", isSpeechDetected);

@@ -250,43 +250,74 @@ export default function GuidedSession() {
         )}
       </div>
       
-      <div className="mb-4 flex flex-col items-center">
-        <div className="flex mb-2 space-x-2">
-          <button
-            onClick={startSession}
-            disabled={isSessionActive || isLoading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
-                Connecting...
-              </span>
-            ) : "Start Session"}
-          </button>
-          <button
-            onClick={stopSession}
-            disabled={!isSessionActive || isLoading}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500/40"
-          >
-            <span className="flex items-center">
-              <StopIcon className="h-4 w-4 mr-2" />
-              End Session
+      {/* Replace the blocky buttons with elegant icon buttons */}
+      <div className="mb-4 flex justify-center">
+        <div className="flex space-x-6">
+          {/* Start Session button */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={startSession}
+              disabled={isSessionActive || isLoading}
+              className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
+                border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
+                disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 dark:hover:bg-blue-800/40 
+                transition-colors"
+              aria-label="Start session"
+            >
+              {isLoading ? (
+                <ArrowPathIcon className="h-5 w-5 animate-spin" aria-hidden="true" />
+              ) : (
+                <MicrophoneIcon className="h-5 w-5" aria-hidden="true" />
+              )}
+            </button>
+            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+              {isLoading ? "Connecting..." : "Start"}
             </span>
-          </button>
-          <button
-            onClick={resetSession}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500/40"
-          >
-            Reset Chat
-          </button>
-          <button
-            onClick={toggleChat}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 flex items-center"
-          >
-            <ChatBubbleLeftRightIcon className="h-4 w-4 mr-2" />
-            Chat
-          </button>
+          </div>
+          
+          {/* End Session button */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={stopSession}
+              disabled={!isSessionActive || isLoading}
+              className="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                border border-red-300 dark:border-red-800 focus:outline-none focus:ring-2 focus:ring-red-500/40
+                disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-200 dark:hover:bg-red-800/40
+                transition-colors"
+              aria-label="End session"
+            >
+              <StopIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">End</span>
+          </div>
+          
+          {/* Reset Chat button */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={resetSession}
+              className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/40
+                hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              aria-label="Reset chat"
+            >
+              <ArrowPathIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Reset</span>
+          </div>
+          
+          {/* Chat button */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={toggleChat}
+              className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
+                border border-blue-300 dark:border-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40
+                hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors"
+              aria-label="Toggle chat"
+            >
+              <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">Chat</span>
+          </div>
         </div>
       </div>
       

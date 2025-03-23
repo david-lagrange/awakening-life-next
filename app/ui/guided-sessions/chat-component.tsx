@@ -34,9 +34,12 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
   const [textInput, setTextInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(true); // Start showing empty state
+  const [hasDetectedSpeech, setHasDetectedSpeech] = useState(false); // Track if we've ever detected speech
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const resizeHandleRef = useRef<HTMLDivElement>(null);
+  const emptyStateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Detect mobile screen size
   useEffect(() => {
@@ -143,33 +146,41 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
     }
   };
   
-  // Monitor speech detection prop changes
+  // Handle speech detection with modified approach
   useEffect(() => {
     console.log("🔷 [ChatComponent] isSpeechDetected prop changed:", isSpeechDetected);
+    
+    // If speech is detected, mark that we've detected speech and hide empty state
+    if (isSpeechDetected) {
+      setHasDetectedSpeech(true); // Remember that we've detected speech
+      setShowEmptyState(false);
+    }
   }, [isSpeechDetected]);
+  
+  // Update empty state based on messages, but respect hasDetectedSpeech flag
+  useEffect(() => {
+    // Only show empty state if there are no messages AND we've never detected speech
+    // Once speech is detected, we never show empty state until at least one message appears
+    if (messages.length > 0) {
+      // If we have messages, reset hasDetectedSpeech and only use showEmptyState
+      setHasDetectedSpeech(false);
+      setShowEmptyState(false);
+    } else if (!hasDetectedSpeech && !isSpeechDetected && !transcription) {
+      // Only show empty state if we've never detected speech and nothing is happening
+      setShowEmptyState(true);
+    }
+  }, [messages.length, hasDetectedSpeech, isSpeechDetected, transcription]);
   
   return (
     <div className="h-full flex flex-col relative">
-      {/* Chat toggle button (when chat is closed) */}
-      {!isChatOpen && (
-        <button
-          onClick={toggleChat}
-          className="fixed right-4 bottom-4 p-3 rounded-full bg-blue-600 text-white shadow-lg 
-            hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 z-10 
-            transition-transform hover:scale-105"
-          aria-label="Open chat"
-          title="Open chat"
-        >
-          <ChatBubbleLeftRightIcon className="h-6 w-6" aria-hidden="true" />
-        </button>
-      )}
+      {/* Removed the floating chat toggle button since we're using the one from guided-session */}
       
       {/* Chat sidebar */}
       <div 
-        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
-          transform transition-transform duration-300 ease-in-out z-40 flex flex-col
+        className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-300 dark:border-gray-700 
+          transform transition-transform duration-300 ease-in-out z-50 flex flex-col
           ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}
-          ${isMobile ? 'left-0 top-16' : ''}`}
+          ${isMobile ? 'left-0' : ''}`}
         style={{ width: isMobile ? '100%' : `${chatWidth}px` }}
       >
         {/* Resize handle - hidden on mobile */}
@@ -204,13 +215,26 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
         
         {/* Chat messages */}
         <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50">
-          {messages.length === 0 && !transcription && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 p-6">
-              <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                <ChatBubbleLeftRightIcon className="h-8 w-8" aria-hidden="true" />
+          {/* Show current transcription or Listening indicator */}
+          {((transcription && transcription.trim().length > 0) || isSpeechDetected) && (
+            <div className="flex justify-end">
+              <div className="max-w-[85%] rounded-lg px-4 py-3 shadow-sm bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800">
+                {transcription && transcription.trim().length > 0 && (
+                  <div className="whitespace-pre-wrap text-sm">{transcription}</div>
+                )}
+                {isSpeechDetected && (
+                  <div className={`flex justify-end ${transcription ? 'mt-1.5' : ''}`}>
+                    <div className="flex items-center">
+                      <span className="text-xs text-gray-600 dark:text-gray-400 mr-2">Listening...</span>
+                      <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-300"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-lg font-medium">No messages yet</p>
-              <p className="mt-2 text-sm">Your conversation will appear here.</p>
             </div>
           )}
           
@@ -241,24 +265,14 @@ const ChatComponent = forwardRef<{ toggleChat: () => void }, ChatComponentProps>
             </div>
           ))}
           
-          {/* Show current transcription or Listening indicator */}
-          {((transcription && transcription.trim().length > 0) || isSpeechDetected) && (
-            <div className="flex justify-end">
-              <div className="max-w-[85%] rounded-lg px-4 py-3 shadow-sm bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800">
-                <div className="whitespace-pre-wrap text-sm">{transcription}</div>
-                {isSpeechDetected && (
-                  <div className="mt-1.5 flex justify-end">
-                    <div className="flex items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400 mr-2">Listening...</span>
-                      <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse"></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-150"></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse delay-300"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+          {/* Only show "No messages yet" when showEmptyState is true and never detected speech */}
+          {showEmptyState && !hasDetectedSpeech && messages.length === 0 && !transcription && !isSpeechDetected && (
+            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 p-6">
+              <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                <ChatBubbleLeftRightIcon className="h-8 w-8" aria-hidden="true" />
               </div>
+              <p className="text-lg font-medium">No messages yet</p>
+              <p className="mt-2 text-sm">Your conversation will appear here.</p>
             </div>
           )}
           

@@ -9,6 +9,7 @@ import { agentProcessMessages } from "@/app/lib/actions/agent/agent-actions";
 import { useLogger } from "@/app/lib/hooks/useLogger";
 import { createNewSession, markSessionComplete } from "@/app/lib/actions/session/session-actions";
 import { createNewSessionMessage } from "@/app/lib/actions/session/session-message-actions";
+import SessionBorder from "@/app/ui/guided-sessions/session-border";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues
@@ -45,6 +46,9 @@ export default function GuidedSession({
   
   // Add a ref to track the latest sessionId
   const sessionIdRef = useRef<string | null>(null);
+  
+  // Add a new state to track if AI is speaking
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
   
   // Update the ref whenever sessionId changes
   useEffect(() => {
@@ -337,11 +341,16 @@ export default function GuidedSession({
       
       // Store the reference to the current audio element
       currentAudioRef.current = audio;
+
+      // Set AI speaking state to true
+      setIsAISpeaking(true);
       
       audio.addEventListener('ended', () => {
         logger.info("Audio playback completed");
         // Clear the reference when playback ends naturally
         currentAudioRef.current = null;
+        // Set AI speaking state to false when done
+        setIsAISpeaking(false);
       });
       
       audio.addEventListener('error', (e) => {
@@ -350,6 +359,8 @@ export default function GuidedSession({
         });
         // Clear the reference on error
         currentAudioRef.current = null;
+        // Also reset speaking state
+        setIsAISpeaking(false);
       });
       
       // Play the audio
@@ -359,12 +370,14 @@ export default function GuidedSession({
             error: error instanceof Error ? error.message : String(error) 
           });
           currentAudioRef.current = null;
+          setIsAISpeaking(false);
         });
     } catch (error) {
       logger.error("Error playing audio from Base64", { 
         error: error instanceof Error ? error.message : String(error)
       });
       currentAudioRef.current = null;
+      setIsAISpeaking(false);
     }
   };
   
@@ -544,6 +557,14 @@ export default function GuidedSession({
 
   return (
     <div className="flex flex-col h-full relative">
+      {/* Session border */}
+      <SessionBorder 
+        status={status} 
+        color={color}
+        isAISpeaking={isAISpeaking}
+        isSpeechDetected={isSpeechDetected} 
+      />
+      
       {/* Main content with controls */}
       <div className="flex-grow flex flex-col items-center justify-center">
         <SessionControls

@@ -335,6 +335,15 @@ export default function GuidedSession({
       // Set the audio source to a data URL with the Base64 encoded audio
       audio.src = `data:audio/mp3;base64,${audioBase64}`;
       
+      // Enable inline playback for iOS (prevents fullscreen playback requirement)
+      audio.setAttribute('playsinline', 'true');
+      
+      // Enable webkit-playsinline for older iOS versions
+      audio.setAttribute('webkit-playsinline', 'true');
+      
+      // Set as low latency as possible
+      audio.preload = 'auto';
+      
       // Store the reference to the current audio element
       currentAudioRef.current = audio;
       
@@ -346,20 +355,66 @@ export default function GuidedSession({
       
       audio.addEventListener('error', (e) => {
         logger.error("Error playing audio", { 
-          error: e instanceof Error ? e.message : String(e)
+          error: e instanceof Error ? e.message : String(e),
+          code: audio.error ? audio.error.code : 'unknown'
         });
         // Clear the reference on error
         currentAudioRef.current = null;
       });
       
-      // Play the audio
-      audio.play()
-        .catch(error => {
-          logger.error("Failed to play audio", { 
-            error: error instanceof Error ? error.message : String(error) 
+      // For mobile devices, try to unlock audio context if needed
+      if (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined') {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContextClass();
+        
+        // Resume audio context if it's suspended (common on mobile)
+        if (audioContext.state === 'suspended') {
+          audioContext.resume().then(() => {
+            logger.info("AudioContext resumed successfully");
+          }).catch(err => {
+            logger.warn("Failed to resume AudioContext", { error: String(err) });
           });
-          currentAudioRef.current = null;
-        });
+        }
+      }
+      
+      // Play the audio with a user activation flag to help with mobile playback
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            logger.info("Audio playback started successfully");
+          })
+          .catch(error => {
+            logger.error("Failed to play audio", {
+              error: error instanceof Error ? error.message : String(error),
+              name: error instanceof Error ? error.name : 'Unknown'
+            });
+            
+            // If autoplay was prevented (common on mobile), add a visible play button
+            if (error.name === 'NotAllowedError') {
+              logger.warn("Autoplay prevented - likely requires user interaction");
+              
+              // Try again on next user interaction
+              const resumeAudio = () => {
+                audio.play().catch(err => {
+                  logger.error("Still failed to play audio after interaction", { 
+                    error: String(err) 
+                  });
+                });
+                // Clean up event listeners after one attempt
+                document.body.removeEventListener('touchstart', resumeAudio);
+                document.body.removeEventListener('click', resumeAudio);
+              };
+              
+              // Add temporary event listeners to try playing on next user interaction
+              document.body.addEventListener('touchstart', resumeAudio, { once: true });
+              document.body.addEventListener('click', resumeAudio, { once: true });
+            }
+            
+            currentAudioRef.current = null;
+          });
+      }
     } catch (error) {
       logger.error("Error playing audio from Base64", { 
         error: error instanceof Error ? error.message : String(error)

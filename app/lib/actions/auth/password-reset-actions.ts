@@ -2,6 +2,10 @@
 
 import { z } from 'zod';
 import { resetPasswordRequest, sendPasswordResetEmail, updatePassword } from '@/app/lib/api/services/auth.service';
+import { createLogger } from '@/app/lib/logger';
+
+// Create component-specific logger
+const passwordResetLogger = createLogger('[SERVER] PasswordResetActions');
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -56,11 +60,18 @@ export async function sendPasswordReset(
   prevState: PasswordResetState,
   formData: FormData,
 ): Promise<PasswordResetState> {
+  const email = formData.get('email') as string;
+  passwordResetLogger.info('Password reset email requested', { email });
+  
   const validatedFields = schema.safeParse({
-    email: formData.get('email'),
+    email: email,
   });
 
   if (!validatedFields.success) {
+    passwordResetLogger.warn('Password reset validation failed', { 
+      email,
+      errors: validatedFields.error.flatten().fieldErrors 
+    });
     return {
       message: null,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -69,12 +80,16 @@ export async function sendPasswordReset(
 
   try {
     await sendPasswordResetEmail(validatedFields.data.email);
+    passwordResetLogger.info('Password reset email sent successfully', { email });
     return {
       message: 'success',
       errors: {},
     };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    passwordResetLogger.error('Failed to send password reset email', { 
+      email, 
+      error: error instanceof Error ? error.message : String(error) 
+    });
     return {
       message: 'Failed to send reset email. Please try again.',
       errors: {},
@@ -86,14 +101,21 @@ export async function resetPassword(
   prevState: ResetPasswordState,
   formData: FormData,
 ): Promise<ResetPasswordState> {
+  const email = formData.get('email') as string;
+  passwordResetLogger.info('Password reset requested', { email });
+  
   const validatedFields = resetPasswordSchema.safeParse({
-    email: formData.get('email'),
+    email: email,
     token: formData.get('token'),
     password: formData.get('password'),
     confirmPassword: formData.get('confirmPassword'),
   });
 
   if (!validatedFields.success) {
+    passwordResetLogger.warn('Password reset validation failed', { 
+      email,
+      errors: validatedFields.error.flatten().fieldErrors 
+    });
     return {
       message: null,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -106,12 +128,16 @@ export async function resetPassword(
       validatedFields.data.token,
       validatedFields.data.password
     );
+    passwordResetLogger.info('Password reset completed successfully', { email });
     return {
       message: 'success',
       errors: {},
     };
   } catch (error) {
-    console.error('Error resetting password:', error);
+    passwordResetLogger.error('Failed to reset password', { 
+      email, 
+      error: error instanceof Error ? error.message : String(error) 
+    });
     return {
       message: 'Failed to reset password. Please try again.',
       errors: {},
@@ -123,6 +149,8 @@ export async function changePassword(
   prevState: ChangePasswordState,
   formData: FormData,
 ): Promise<ChangePasswordState> {
+  passwordResetLogger.info('Password change requested');
+  
   const validatedFields = changePasswordSchema.safeParse({
     currentPassword: formData.get('currentPassword'),
     newPassword: formData.get('newPassword'),
@@ -130,6 +158,9 @@ export async function changePassword(
   });
 
   if (!validatedFields.success) {
+    passwordResetLogger.warn('Password change validation failed', { 
+      errors: validatedFields.error.flatten().fieldErrors 
+    });
     return {
       message: null,
       errors: validatedFields.error.flatten().fieldErrors,
@@ -141,12 +172,15 @@ export async function changePassword(
       validatedFields.data.currentPassword,
       validatedFields.data.newPassword
     );
+    passwordResetLogger.info('Password changed successfully');
     return {
       message: 'success',
       errors: {},
     };
   } catch (error) {
-    console.error('Error updating password:', error);
+    passwordResetLogger.error('Failed to change password', { 
+      error: error instanceof Error ? error.message : String(error) 
+    });
     return {
       message: 'Failed to update password. Please check your current password and try again.',
       errors: {},

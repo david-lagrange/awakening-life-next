@@ -1,6 +1,10 @@
 "use server";
 
 import OpenAI from "openai";
+import { createLogger } from '@/app/lib/logger';
+
+// Create component-specific logger
+const agentResponseLogger = createLogger('[SERVER] AgentResponseActions');
 
 // Define message types for consistency with agent-actions.ts
 interface SimpleMessage {
@@ -20,23 +24,28 @@ export async function convertResponseToSpeech(
   conversationHistory: SimpleMessage[],
   voicePreference?: OpenAIVoice
 ): Promise<{ audioBase64: string }> {
+  agentResponseLogger.info('Converting text response to speech', {
+    responseLength: textResponse.length,
+    responsePreview: textResponse.substring(0, 30) + '...',
+    historyLength: conversationHistory.length,
+    voicePreference
+  });
+
   try {
     // Initialize OpenAI client
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    console.log("🔷 [convertResponseToSpeech] textResponse:", textResponse);
-    console.log("🔷 [convertResponseToSpeech] conversationHistory:", conversationHistory);
-    console.log("🔷 [convertResponseToSpeech] voicePreference:", voicePreference);
-    // Step 1: Determine appropriate voice settings based on conversation context
-    // const voiceSettings = await determineVoiceSettings(
-    //   textResponse, 
-    //   conversationHistory,
-    //   voicePreference
-    // );
-    
+    agentResponseLogger.debug('Text to speech conversion details', {
+      textResponsePreview: textResponse.substring(0, 50) + '...',
+      conversationHistoryCount: conversationHistory.length,
+      latestHistoryItem: conversationHistory.length > 0 ? 
+        `${conversationHistory[conversationHistory.length-1].role}: ${conversationHistory[conversationHistory.length-1].content.substring(0, 30)}...` : 'None',
+      voicePreference
+    });
 
+    // Voice settings
     const voiceSettings = {
       voice: "nova",
       instructions: `Voice Affect: Soft, gentle, soothing; embody tranquility.
@@ -52,9 +61,17 @@ export async function convertResponseToSpeech(
         Pauses: Use thoughtful pauses, especially between breathing instructions and visualization guidance, enhancing relaxation and mindfulness.`
     };
 
-    console.log("Using voice settings:", voiceSettings);
+    agentResponseLogger.info('Using voice settings', {
+      voice: voiceSettings.voice,
+      instructionsPreview: voiceSettings.instructions.substring(0, 50) + '...'
+    });
 
     // Step 2: Generate speech using OpenAI's TTS API
+    agentResponseLogger.info('Calling OpenAI TTS API', {
+      model: "gpt-4o-mini-tts",
+      voice: voiceSettings.voice
+    });
+
     const speechResponse = await openai.audio.speech.create({
       model: "gpt-4o-mini-tts",
       voice: voiceSettings.voice as OpenAIVoice,
@@ -66,12 +83,20 @@ export async function convertResponseToSpeech(
     const buffer = Buffer.from(await speechResponse.arrayBuffer());
     const audioBase64 = buffer.toString('base64');
     
+    agentResponseLogger.info('Successfully converted text to speech', {
+      audioSizeBytes: buffer.length
+    });
+    
     // Return the Base64 encoded audio data
     return {
       audioBase64
     };
   } catch (error) {
-    console.error("Error converting text to speech:", error);
+    agentResponseLogger.error('Error converting text to speech', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      textResponsePreview: textResponse.substring(0, 30) + '...'
+    });
     throw error;
   }
 }
@@ -93,14 +118,24 @@ export async function convertResponseToSpeech(
 //   conversationHistory: SimpleMessage[],
 //   preferredVoice?: OpenAIVoice
 // ): Promise<VoiceSettings> {
+//   agentResponseLogger.info('Determining voice settings', {
+//     responseLength: textResponse.length,
+//     historyLength: conversationHistory.length,
+//     preferredVoice
+//   });
+//
 //   try {
 //     // Use the user's preferred voice if provided
 //     const voice = preferredVoice || "nova"; // Default to "nova" if not specified
-    
+//     
 //     const openai = new OpenAI({
 //       apiKey: process.env.OPENAI_API_KEY,
 //     });
-
+//
+//     agentResponseLogger.info('Analyzing conversation for voice instructions', {
+//       voice
+//     });
+//
 //     // Create a prompt for the LLM to analyze the conversation and suggest instructions only
 //     const voiceAnalysisMessages = [
 //       {
@@ -115,32 +150,42 @@ export async function convertResponseToSpeech(
 //         role: "user" as const,
 //         content: `Conversation history:
 //           ${JSON.stringify(conversationHistory)}
-          
+//           
 //           Assistant's response to convert to speech:
 //           "${textResponse}"
-          
+//           
 //           Based on this context, what instructions would create the most natural and appropriate speech?`
 //       }
 //     ];
-
+//
 //     const completion = await openai.chat.completions.create({
 //       model: "gpt-4o",
 //       messages: voiceAnalysisMessages
 //     });
-
+//
 //     const instructions = completion.choices[0].message.content || 
 //       "Speak in a natural, conversational tone with moderate pacing.";
-
-//     console.log("Voice Instructions:", instructions);
-
+//
+//     agentResponseLogger.info('Voice instructions determined', {
+//       voice,
+//       instructionsPreview: instructions.substring(0, 50) + '...'
+//     });
+//
 //     return {
 //       voice,
 //       instructions
 //     };
 //   } catch (error) {
-//     console.error("Error determining voice settings:", error);
-    
+//     agentResponseLogger.error('Error determining voice settings', {
+//       error: error instanceof Error ? error.message : String(error),
+//       stack: error instanceof Error ? error.stack : undefined
+//     });
+//     
 //     // Return default settings with the preferred voice in case of error
+//     agentResponseLogger.info('Using default voice settings due to error', {
+//       voice: preferredVoice || "nova"
+//     });
+//     
 //     return {
 //       voice: preferredVoice || "nova",
 //       instructions: "Speak in a natural, conversational tone with moderate pacing."

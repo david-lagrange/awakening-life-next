@@ -6,12 +6,14 @@ import SessionControls from "@/app/ui/guided-sessions/session-controls";
 import { AudioCaptureService } from "@/app/lib/services/audio-capture";
 import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/transcription";
 import { agentProcessMessages } from "@/app/lib/actions/agent/agent-actions";
+import { useLogger } from "@/app/lib/hooks/useLogger";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues
 let conversationHistory: { role: 'user' | 'assistant' | 'system', content: string }[] = [];
 
 export default function GuidedSession() {
+  const logger = useLogger('[CLIENT] GuidedSession');
   const [transcription, setTranscription] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<TranscriptionStatus>('idle');
@@ -71,18 +73,18 @@ export default function GuidedSession() {
       },
       // Add new handlers for speech events
       onSpeechStarted: () => {
-        console.log("🔷 [GuidedSession] Speech started - updating state");
+        logger.info('Speech started - updating state');
         setIsSpeechDetected(true);
         
         // Stop any playing audio when user starts speaking
         if (currentAudioRef.current) {
-          console.log("🔷 [GuidedSession] Stopping audio playback because user started speaking");
+          logger.info('Stopping audio playback because user started speaking');
           currentAudioRef.current.pause();
           currentAudioRef.current = null;
         }
       },
       onSpeechStopped: () => {
-        console.log("🔷 [GuidedSession] Speech stopped - updating state");
+        logger.info('Speech stopped - updating state');
         setIsSpeechDetected(false);
       }
     });
@@ -116,7 +118,9 @@ export default function GuidedSession() {
     
     try {
       // Log conversation history to verify what's being sent
-      console.log("Sending conversation history to LLM:", conversationHistory);
+      logger.debug("Sending conversation history to LLM", { 
+        historyLength: conversationHistory.length 
+      });
       
       // Call LLM with simplified conversation history objects
       const response = await agentProcessMessages(
@@ -146,7 +150,9 @@ export default function GuidedSession() {
       
       // Handle tool calls
       if (response.toolCalls && response.toolCalls.length > 0) {
-        console.log("Tool calls from LLM:", response.toolCalls);
+        logger.info("Tool calls received from LLM", { 
+          toolCallCount: response.toolCalls.length 
+        });
         // Future implementation: Execute tool calls
       }
       
@@ -167,7 +173,9 @@ export default function GuidedSession() {
         console.error("Error converting response to speech:", error);
       }
     } catch (error) {
-      console.error("Error getting LLM response:", error);
+      logger.error("Error getting LLM response", { 
+        error: error instanceof Error ? error.message : String(error)
+      });
       
       // Update UI with error state
       setMessages(prev => prev.map(msg => 
@@ -200,13 +208,15 @@ export default function GuidedSession() {
       currentAudioRef.current = audio;
       
       audio.addEventListener('ended', () => {
-        console.log("Audio playback completed");
+        logger.info("Audio playback completed");
         // Clear the reference when playback ends naturally
         currentAudioRef.current = null;
       });
       
       audio.addEventListener('error', (e) => {
-        console.error("Error playing audio:", e);
+        logger.error("Error playing audio", { 
+          error: e instanceof Error ? e.message : String(e)
+        });
         // Clear the reference on error
         currentAudioRef.current = null;
       });
@@ -214,11 +224,15 @@ export default function GuidedSession() {
       // Play the audio
       audio.play()
         .catch(error => {
-          console.error("Failed to play audio:", error);
+          logger.error("Failed to play audio", { 
+            error: error instanceof Error ? error.message : String(error) 
+          });
           currentAudioRef.current = null;
         });
     } catch (error) {
-      console.error("Error playing audio from Base64:", error);
+      logger.error("Error playing audio from Base64", { 
+        error: error instanceof Error ? error.message : String(error)
+      });
       currentAudioRef.current = null;
     }
   };
@@ -265,7 +279,7 @@ export default function GuidedSession() {
   
   // Start the guided session
   const startSession = async () => {
-    console.log("🔷 [GuidedSession] Starting guided session");
+    logger.info("Starting guided session");
     setTranscription("");
     // Don't clear messages when starting a new session
     setError(null);
@@ -277,7 +291,7 @@ export default function GuidedSession() {
   
   // Stop the guided session
   const stopSession = () => {
-    console.log("🔷 [GuidedSession] Stopping guided session");
+    logger.info("Stopping guided session");
     
     if (audioCapture) {
       audioCapture.stop();
@@ -340,7 +354,7 @@ export default function GuidedSession() {
   
   // Monitor speech detection state changes
   useEffect(() => {
-    console.log("🔷 [GuidedSession] isSpeechDetected state changed:", isSpeechDetected);
+    logger.debug("isSpeechDetected state changed", { isSpeechDetected });
   }, [isSpeechDetected]);
 
   return (

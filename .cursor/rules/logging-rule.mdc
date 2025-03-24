@@ -1,0 +1,122 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Application Logging System
+
+## Overview
+
+This application provides a comprehensive logging system that works across both server and client components. It features CloudWatch integration for production environments and proper log formatting for all environments. Always use these logging mechanisms instead of console.log statements.
+
+## Server-Side Logging [SERVER]
+
+For server components, use the `logger` module directly:
+
+```typescript
+import logger, { createLogger } from '@/app/lib/logger';
+
+// Direct usage
+logger.info('This is an info message');
+logger.error('An error occurred', { errorDetails: 'More information' });
+
+// Component-specific logger (recommended)
+const componentLogger = createLogger('[SERVER] ComponentName', { contextData: 'value' });
+componentLogger.info('Component initialized');
+componentLogger.error('Component error', { errorData: 'details' });
+```
+
+### Available Methods
+
+- `logger.debug(message, data?)` - For development debugging information
+- `logger.info(message, data?)` - For general information
+- `logger.warn(message, data?)` - For warnings
+- `logger.error(message, data?)` - For errors
+
+### Creating Component-Specific Loggers
+
+Use the `createLogger` function to create loggers specific to components:
+
+```typescript
+const logger = createLogger('[SERVER] ComponentName', { userId: '123' });
+```
+
+This adds component name and context to all logs, making them easier to filter and analyze. Always prefix server component names with `[SERVER]` to distinguish them from client logs.
+
+## Client-Side Logging [CLIENT]
+
+For client components, use the `useLogger` hook:
+
+```typescript
+import { useLogger } from '@/app/lib/hooks/useLogger';
+
+export default function ClientComponent() {
+  const logger = useLogger('[CLIENT] ClientComponent', { additional: 'context' });
+  
+  const handleClick = () => {
+    logger.info('Button clicked', { buttonId: 'submit' });
+  };
+  
+  return <button onClick={handleClick}>Submit</button>;
+}
+```
+
+### Available Methods
+
+- `logger.debug(message, data?)` - For development debugging information
+- `logger.info(message, data?)` - For general information
+- `logger.warn(message, data?)` - For warnings
+- `logger.error(message, data?)` - For errors
+
+Client-side logs are automatically sent to the server via the `/api/log` endpoint and then processed using the server-side logger. Always prefix client component names with `[CLIENT]` to distinguish them from server logs.
+
+## Next.js API Route Logging
+
+In API routes, import and use the server-side logger:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/app/lib/logger';
+
+export async function POST(request: NextRequest) {
+  const routeLogger = createLogger('[SERVER] API/RouteHandler', { path: request.url });
+  routeLogger.info('API route called');
+  
+  try {
+    // Your API logic here
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    routeLogger.error('API error occurred', { 
+      error: error instanceof Error ? error.message : String(error)
+    });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+  }
+}
+```
+
+## Best Practices
+
+1. **Use Source Prefixes** - Always prefix component names with `[SERVER]` or `[CLIENT]` to easily distinguish the source.
+
+2. **Always use structured logging** - Include relevant data as a second parameter rather than string concatenation:
+   ```typescript
+   // Good
+   logger.info('User authenticated', { userId: '123', role: 'admin' });
+   
+   // Avoid
+   logger.info(`User ${userId} authenticated with role ${role}`);
+   ```
+
+3. **Be consistent with component names** - Use PascalCase for component names in the logger, with appropriate prefixes.
+
+4. **Include context when appropriate** - Add relevant context that will help with debugging.
+
+5. **Log at appropriate levels** - Use debug for development, info for general information, warn for potential issues, and error for actual errors.
+
+6. **Avoid sensitive information** - Never log passwords, tokens, or sensitive personal information. The logger includes redaction for common sensitive fields, but be cautious.
+
+7. **Include relevant metadata** - When logging errors, include stack traces and related information to assist with debugging.
+
+8. **Never use console.log directly** - Always use the provided logging utility.
+
+By following these guidelines, you'll ensure consistent, structured logging throughout the application, enabling better debugging and monitoring in production.

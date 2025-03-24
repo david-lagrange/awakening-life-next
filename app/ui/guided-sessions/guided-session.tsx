@@ -7,13 +7,27 @@ import { AudioCaptureService } from "@/app/lib/services/audio-capture";
 import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/transcription";
 import { agentProcessMessages } from "@/app/lib/actions/agent/agent-actions";
 import { useLogger } from "@/app/lib/hooks/useLogger";
+import { createNewSession, markSessionComplete } from "@/app/lib/actions/session/session-actions";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues
 let conversationHistory: { role: 'user' | 'assistant' | 'system', content: string }[] = [];
 
-export default function GuidedSession() {
+interface GuidedSessionProps {
+  sessionType: string;
+  model?: string;
+  voice?: string;
+  color?: string;
+}
+
+export default function GuidedSession({ 
+  sessionType, 
+  model = "gpt-4o", 
+  voice = "nova", 
+  color = "#3B82F6" 
+}: GuidedSessionProps) {
   const logger = useLogger('[CLIENT] GuidedSession');
+  
   const [transcription, setTranscription] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<TranscriptionStatus>('idle');
@@ -22,6 +36,7 @@ export default function GuidedSession() {
   const [transcriptionService, setTranscriptionService] = useState<TranscriptionService | null>(null);
   const [isSpeechDetected, setIsSpeechDetected] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   // Add a ref to track the current playing audio element
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const chatComponentRef = useRef<{ toggleChat: () => void } | null>(null);
@@ -91,10 +106,15 @@ export default function GuidedSession() {
     
     setTranscriptionService(newTranscriptionService);
     
-    // Clean up conversation history on unmount
+    // Clean up conversation history and session on unmount
     return () => {
       stopSession();
       conversationHistory = [];
+      
+      // Complete the session when component unmounts
+      if (sessionId) {
+        completeSession();
+      }
       
       // Also stop any playing audio
       if (currentAudioRef.current) {
@@ -103,6 +123,38 @@ export default function GuidedSession() {
       }
     };
   }, []);
+
+  // Add effect to handle page navigation/tab closing
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (sessionId) {
+        // Try to complete the session when the page is about to unload
+        completeSession();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionId]);
+  
+  // Helper function to complete a session
+  const completeSession = async () => {
+    if (sessionId) {
+      logger.info('Completing session due to navigation/unmount', { sessionId });
+      try {
+        await markSessionComplete(sessionId);
+        setSessionId(null);
+      } catch (error) {
+        logger.error('Failed to complete session', { 
+          sessionId,
+          error: error instanceof Error ? error.message : String(error) 
+        });
+      }
+    }
+  };
   
   // Simulate assistant response (this would be replaced with actual API call)
   const simulateAssistantResponse = async () => {
@@ -122,13 +174,14 @@ export default function GuidedSession() {
         historyLength: conversationHistory.length 
       });
       
-      // Call LLM with simplified conversation history objects
+      // Call LLM with simplified conversation history objects and pass the model
       const response = await agentProcessMessages(
         // Convert to simple objects that will serialize properly
         conversationHistory.map(msg => ({
           role: msg.role,
           content: msg.content
-        }))
+        })),
+        model // Pass the model prop
       );
       
       // Add assistant response to conversation history
@@ -164,7 +217,8 @@ export default function GuidedSession() {
           conversationHistory.map(msg => ({
             role: msg.role,
             content: msg.content
-          }))
+          })),
+          voice // Pass the voice prop
         );
         
         // Play the audio from Base64 string
@@ -279,13 +333,49 @@ export default function GuidedSession() {
   
   // Start the guided session
   const startSession = async () => {
-    logger.info("Starting guided session");
+    logger.info("Starting guided session", { sessionType });
     setTranscription("");
     // Don't clear messages when starting a new session
     setError(null);
     
-    if (transcriptionService) {
-      await transcriptionService.start();
+    try {
+      // Create a new session in the backend
+      const result = await createNewSession(
+        { success: false },
+        (() => {
+          const formData = new FormData();
+          formData.append('type', sessionType);
+          return formData;
+        })()
+      );
+      
+      if (result.success && result.message) {
+        // Extract session ID from the message or use another method to get it
+        // This assumes the createNewSession returns the session ID
+        // You may need to modify the session-actions.ts to return the session ID
+        const sessionResponse = result as unknown as { sessionId?: string };
+        if (sessionResponse.sessionId) {
+          setSessionId(sessionResponse.sessionId);
+          logger.info('Session created successfully', { 
+            sessionId: sessionResponse.sessionId,
+            type: sessionType 
+          });
+        } else {
+          logger.warn('Session created but no ID returned');
+        }
+      } else {
+        logger.error('Failed to create session', { 
+          error: result.message || 'Unknown error' 
+        });
+      }
+      
+      if (transcriptionService) {
+        await transcriptionService.start();
+      }
+    } catch (error) {
+      logger.error('Error creating session', { 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   };
   
@@ -300,6 +390,11 @@ export default function GuidedSession() {
     
     if (transcriptionService) {
       transcriptionService.stop();
+    }
+    
+    // Complete the session when it's stopped manually
+    if (sessionId) {
+      completeSession();
     }
   };
   
@@ -367,6 +462,7 @@ export default function GuidedSession() {
           startSession={startSession}
           stopSession={stopSession}
           toggleChat={toggleChat}
+          color={color}
         />
       </div>
       

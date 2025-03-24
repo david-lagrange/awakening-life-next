@@ -16,12 +16,12 @@ type Link = {
 };
 
 const links: Link[] = [
-  {
-    label: "Life Purpose",
-    href: "/sessions/life-purpose",
-    authRequired: true,
-    dot: "#3B82F6", // Blue color from life-purpose page
-  },
+  // {
+  //   label: "Life Purpose",
+  //   href: "/sessions/life-purpose",
+  //   authRequired: true,
+  //   dot: "#3B82F6", // Blue color from life-purpose page
+  // },
   {
     label: "Gratitude",
     href: "/sessions/gratitude",

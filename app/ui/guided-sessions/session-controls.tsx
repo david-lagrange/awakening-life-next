@@ -15,6 +15,7 @@ interface SessionControlsProps {
   startSession: () => void;
   stopSession: () => void;
   toggleChat: () => void;
+  color?: string;
 }
 
 export default function SessionControls({ 
@@ -22,11 +23,12 @@ export default function SessionControls({
   error, 
   startSession, 
   stopSession, 
-  toggleChat 
+  toggleChat,
+  color = "#3B82F6"
 }: SessionControlsProps) {
   const isLoading = status === 'connecting';
   const isSessionActive = status === 'active';
-  const circleColor = "#3B82F6"; // Blue color matching the style
+  const circleColor = color;
   
   return (
     <div className="flex flex-col items-center">

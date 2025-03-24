@@ -22,13 +22,13 @@ type OpenAIVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'c
 export async function convertResponseToSpeech(
   textResponse: string,
   conversationHistory: SimpleMessage[],
-  voicePreference?: OpenAIVoice
+  voice: string = 'nova'
 ): Promise<{ audioBase64: string }> {
   agentResponseLogger.info('Converting text response to speech', {
     responseLength: textResponse.length,
     responsePreview: textResponse.substring(0, 30) + '...',
     historyLength: conversationHistory.length,
-    voicePreference
+    voice
   });
 
   try {
@@ -37,17 +37,21 @@ export async function convertResponseToSpeech(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Validate the voice parameter against OpenAIVoice type
+    const validVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer', 'coral', 'sage', 'ash'];
+    const safeVoice = validVoices.includes(voice) ? voice as OpenAIVoice : 'nova' as OpenAIVoice;
+
     agentResponseLogger.debug('Text to speech conversion details', {
       textResponsePreview: textResponse.substring(0, 50) + '...',
       conversationHistoryCount: conversationHistory.length,
       latestHistoryItem: conversationHistory.length > 0 ? 
         `${conversationHistory[conversationHistory.length-1].role}: ${conversationHistory[conversationHistory.length-1].content.substring(0, 30)}...` : 'None',
-      voicePreference
+      voice: safeVoice
     });
 
     // Voice settings
     const voiceSettings = {
-      voice: "nova",
+      voice: safeVoice,
       instructions: `Voice Affect: Soft, gentle, soothing; embody tranquility.
 
         Tone: Calm, reassuring, peaceful; convey genuine warmth and serenity.
@@ -74,7 +78,7 @@ export async function convertResponseToSpeech(
 
     const speechResponse = await openai.audio.speech.create({
       model: "gpt-4o-mini-tts",
-      voice: voiceSettings.voice as OpenAIVoice,
+      voice: voiceSettings.voice,
       input: textResponse,
       instructions: voiceSettings.instructions,
     });

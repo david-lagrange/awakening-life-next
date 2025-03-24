@@ -14,11 +14,15 @@ interface SimpleMessage {
 }
 
 // Server action to send messages to the LLM and get responses
-export async function agentProcessMessages(messages: SimpleMessage[]) {
+export async function agentProcessMessages(
+  messages: SimpleMessage[], 
+  model: string = "gpt-4o" // Add model parameter with default
+) {
   agentLogger.info('Processing agent messages', { 
     messageCount: messages.length,
     firstMessagePreview: messages.length > 0 ? 
-      `${messages[0].role}: ${messages[0].content.substring(0, 30)}...` : 'None'
+      `${messages[0].role}: ${messages[0].content.substring(0, 30)}...` : 'None',
+    model
   });
   
   try {
@@ -66,14 +70,14 @@ export async function agentProcessMessages(messages: SimpleMessage[]) {
     ];
 
     agentLogger.info('Calling OpenAI API', {
-      model: "gpt-4o",
+      model: model,
       messageCount: formattedMessages.length,
       toolsCount: tools.length
     });
 
-    // Call the OpenAI API
+    // Call the OpenAI API with the specified model
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: model,
       messages: formattedMessages,
       tools: tools,
     });

@@ -8,6 +8,7 @@ import { TranscriptionService, TranscriptionStatus } from "@/app/lib/services/tr
 import { agentProcessMessages } from "@/app/lib/actions/agent/agent-actions";
 import { useLogger } from "@/app/lib/hooks/useLogger";
 import { createNewSession, markSessionComplete } from "@/app/lib/actions/session/session-actions";
+import { createNewSessionMessage } from "@/app/lib/actions/session/session-message-actions";
 
 // This array will store the full conversation history for LLM calls
 // It exists outside React state to avoid serialization issues
@@ -42,6 +43,14 @@ export default function GuidedSession({
   const chatComponentRef = useRef<{ toggleChat: () => void } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   
+  // Add a ref to track the latest sessionId
+  const sessionIdRef = useRef<string | null>(null);
+  
+  // Update the ref whenever sessionId changes
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+  
   // Initialize services
   useEffect(() => {
     // Create the transcription service
@@ -53,6 +62,9 @@ export default function GuidedSession({
         // Add completed transcription as a new message with timestamp
         setIsSpeechDetected(false); // Reset speech detection when transcription is complete
         if (fullTranscript && fullTranscript.trim()) {
+          // Get the current sessionId from the ref instead of state
+          const currentSessionId = sessionIdRef.current;
+          
           const newMessage = { 
             role: 'user' as const, 
             content: fullTranscript.trim(),
@@ -68,6 +80,18 @@ export default function GuidedSession({
             role: 'user',
             content: fullTranscript.trim()
           });
+          
+          // Use the captured sessionId in a log to debug
+          logger.info('Current sessionId when processing transcript', { 
+            sessionId: currentSessionId 
+          });
+          
+          // Save speech transcription to backend - pass the current sessionId directly
+          if (currentSessionId) {
+            saveMessageToBackend(fullTranscript.trim(), 'user', currentSessionId);
+          } else {
+            logger.warn('No sessionId available to save transcription message');
+          }
           
           setTranscription(""); // Clear the transcription for the next speech segment
           
@@ -112,7 +136,7 @@ export default function GuidedSession({
       conversationHistory = [];
       
       // Complete the session when component unmounts
-      if (sessionId) {
+      if (sessionIdRef.current) {
         completeSession();
       }
       
@@ -156,8 +180,54 @@ export default function GuidedSession({
     }
   };
   
+  // Update the saveMessageToBackend function to accept an explicit sessionId parameter
+  const saveMessageToBackend = async (messageContent: string, role: 'user' | 'assistant', explicitSessionId?: string) => {
+    // Use the explicit sessionId if provided, otherwise fall back to the ref value
+    const effectiveSessionId = explicitSessionId || sessionIdRef.current;
+    
+    logger.info('SessionId from saveMessageToBackend', { sessionId: effectiveSessionId });
+
+    if (!effectiveSessionId) {
+      logger.warn('Attempted to save message but no sessionId exists');
+      return;
+    }
+    
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append('message', messageContent);
+      formData.append('role', role);
+      formData.append('weight', '3'); // Fixed weight as specified
+      
+      // Fire and forget - don't await the result
+      createNewSessionMessage(
+        effectiveSessionId,
+        { success: false },
+        formData
+      ).catch(error => {
+        logger.error('Error saving message to backend', {
+          sessionId: effectiveSessionId,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      });
+    } catch (error) {
+      logger.error('Error preparing to save message', {
+        sessionId: effectiveSessionId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  };
+  
   // Simulate assistant response (this would be replaced with actual API call)
   const simulateAssistantResponse = async () => {
+    // Capture current sessionId from ref instead of state
+    const currentSessionId = sessionIdRef.current;
+    
+    // Log the current sessionId to help with debugging
+    logger.info('Current sessionId when generating response', { 
+      sessionId: currentSessionId 
+    });
+
     // First add a pending message to UI
     const pendingMessage: Message = {
       role: 'assistant',
@@ -200,6 +270,13 @@ export default function GuidedSession({
             }
           : msg
       ));
+      
+      // Save assistant message to backend
+      if (currentSessionId) {
+        saveMessageToBackend(response.textResponse, 'assistant', currentSessionId);
+      } else {
+        logger.warn('No sessionId available to save assistant message');
+      }
       
       // Handle tool calls
       if (response.toolCalls && response.toolCalls.length > 0) {
@@ -291,7 +368,7 @@ export default function GuidedSession({
     }
   };
   
-  // Handle text message from chat component
+  // Update handleSendMessage to save the message
   const handleSendMessage = (message: string) => {
     const newMessage: Message = {
       role: 'user',
@@ -308,6 +385,13 @@ export default function GuidedSession({
       role: 'user',
       content: message
     });
+    
+    // Save message to backend
+    if (sessionIdRef.current) {
+      saveMessageToBackend(message, 'user', sessionIdRef.current);
+    } else {
+      logger.warn('No sessionId available to save user message');
+    }
     
     // Simulate response
     simulateAssistantResponse();
@@ -335,7 +419,6 @@ export default function GuidedSession({
   const startSession = async () => {
     logger.info("Starting guided session", { sessionType });
     setTranscription("");
-    // Don't clear messages when starting a new session
     setError(null);
     
     try {
@@ -349,28 +432,35 @@ export default function GuidedSession({
         })()
       );
       
-      if (result.success && result.message) {
-        // Extract session ID from the message or use another method to get it
-        // This assumes the createNewSession returns the session ID
-        // You may need to modify the session-actions.ts to return the session ID
-        const sessionResponse = result as unknown as { sessionId?: string };
-        if (sessionResponse.sessionId) {
-          setSessionId(sessionResponse.sessionId);
-          logger.info('Session created successfully', { 
-            sessionId: sessionResponse.sessionId,
-            type: sessionType 
-          });
-        } else {
-          logger.warn('Session created but no ID returned');
-        }
+      // Check if session creation was successful
+      const sessionResponse = result as unknown as { sessionId?: string };
+      if (result.success && sessionResponse.sessionId) {
+        // Store sessionId in a local variable first
+        const newSessionId = sessionResponse.sessionId;
+        
+        // Set the session ID in state
+        setSessionId(newSessionId);
+        
+        logger.info('Session created successfully', { 
+          sessionId: newSessionId,
+          type: sessionType 
+        });
+        
+        // Wait a moment to ensure state is updated
+        setTimeout(() => {
+          // Only start transcription service after ensuring sessionId is set
+          if (transcriptionService) {
+            transcriptionService.start().then(() => {
+              logger.info('Transcription service started with active sessionId', {
+                sessionId: newSessionId
+              });
+            });
+          }
+        }, 100); // Small delay to allow React to process state update
       } else {
-        logger.error('Failed to create session', { 
+        logger.error('Failed to create session or no ID returned', { 
           error: result.message || 'Unknown error' 
         });
-      }
-      
-      if (transcriptionService) {
-        await transcriptionService.start();
       }
     } catch (error) {
       logger.error('Error creating session', { 
@@ -393,7 +483,7 @@ export default function GuidedSession({
     }
     
     // Complete the session when it's stopped manually
-    if (sessionId) {
+    if (sessionIdRef.current) {
       completeSession();
     }
   };

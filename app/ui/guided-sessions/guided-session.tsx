@@ -96,7 +96,7 @@ export default function GuidedSession({
           setTranscription(""); // Clear the transcription for the next speech segment
           
           // Get response
-          simulateAssistantResponse();
+          getAssistantResponse();
         }
       },
       onError: (message) => {
@@ -218,8 +218,8 @@ export default function GuidedSession({
     }
   };
   
-  // Simulate assistant response (this would be replaced with actual API call)
-  const simulateAssistantResponse = async () => {
+  // Get assistant response
+  const getAssistantResponse = async () => {
     // Capture current sessionId from ref instead of state
     const currentSessionId = sessionIdRef.current;
     
@@ -394,7 +394,7 @@ export default function GuidedSession({
     }
     
     // Simulate response
-    simulateAssistantResponse();
+    getAssistantResponse();
   };
   
   // Start capturing audio and sending to transcription service

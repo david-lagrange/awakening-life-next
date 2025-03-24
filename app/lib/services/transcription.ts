@@ -20,8 +20,8 @@ export class TranscriptionService {
     this.events = events;
   }
 
-  async start(): Promise<void> {
-    if (this.status === 'active' || this.status === 'connecting') return;
+  async start(force: boolean = false): Promise<void> {
+    if ((this.status === 'active' || this.status === 'connecting') && !force) return;
     
     try {
       this.setStatus('connecting');
@@ -133,7 +133,7 @@ export class TranscriptionService {
     this.ws = null;
   }
 
-  private setStatus(status: TranscriptionStatus): void {
+  setStatus(status: TranscriptionStatus): void {
     this.status = status;
     this.events.onStatusChange(status);
   }

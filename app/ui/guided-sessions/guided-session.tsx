@@ -363,8 +363,8 @@ export default function GuidedSession({
       });
       
       // For mobile devices, try to unlock audio context if needed
-      if (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined') {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (typeof AudioContext !== 'undefined' || typeof (window as Window & typeof globalThis & { webkitAudioContext?: AudioContext }).webkitAudioContext !== 'undefined') {
+        const AudioContextClass = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: AudioContext }).webkitAudioContext;
         const audioContext = new AudioContextClass();
         
         // Resume audio context if it's suspended (common on mobile)
@@ -476,6 +476,9 @@ export default function GuidedSession({
     setTranscription("");
     setError(null);
     
+    // Set UI state to connecting immediately
+    setStatus('connecting');
+    
     try {
       // Create a new session in the backend
       const result = await createNewSession(
@@ -501,26 +504,28 @@ export default function GuidedSession({
           type: sessionType 
         });
         
-        // Wait a moment to ensure state is updated
-        setTimeout(() => {
-          // Only start transcription service after ensuring sessionId is set
-          if (transcriptionService) {
-            transcriptionService.start().then(() => {
-              logger.info('Transcription service started with active sessionId', {
-                sessionId: newSessionId
-              });
+        // Only start transcription service after ensuring sessionId is set
+        if (transcriptionService) {
+          // Pass true to force start even if status is already 'connecting'
+          transcriptionService.start(true).then(() => {
+            logger.info('Transcription service started with active sessionId', {
+              sessionId: newSessionId
             });
-          }
-        }, 100); // Small delay to allow React to process state update
+          });
+        }
       } else {
         logger.error('Failed to create session or no ID returned', { 
           error: result.message || 'Unknown error' 
         });
+        // Reset to idle state if session creation failed
+        setStatus('idle');
       }
     } catch (error) {
       logger.error('Error creating session', { 
         error: error instanceof Error ? error.message : String(error) 
       });
+      // Reset to idle state if there was an error
+      setStatus('idle');
     }
   };
   

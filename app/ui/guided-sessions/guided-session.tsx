@@ -15,14 +15,14 @@ import { createNewSessionMessage } from "@/app/lib/actions/session/session-messa
 let conversationHistory: { role: 'user' | 'assistant' | 'system', content: string }[] = [];
 
 interface GuidedSessionProps {
-  sessionType: string;
+  sessionTypeId: string;
   model?: string;
   voice?: string;
   color?: string;
 }
 
 export default function GuidedSession({ 
-  sessionType, 
+  sessionTypeId, 
   model = "gpt-4o", 
   voice = "nova", 
   color = "#3B82F6" 
@@ -472,7 +472,7 @@ export default function GuidedSession({
   
   // Start the guided session
   const startSession = async () => {
-    logger.info("Starting guided session", { sessionType });
+    logger.info("Starting guided session", { sessionTypeId });
     setTranscription("");
     setError(null);
     
@@ -485,7 +485,7 @@ export default function GuidedSession({
         { success: false },
         (() => {
           const formData = new FormData();
-          formData.append('type', sessionType);
+          formData.append('sessionTypeId', sessionTypeId);
           return formData;
         })()
       );
@@ -501,7 +501,7 @@ export default function GuidedSession({
         
         logger.info('Session created successfully', { 
           sessionId: newSessionId,
-          type: sessionType 
+          type: sessionTypeId 
         });
         
         // Only start transcription service after ensuring sessionId is set

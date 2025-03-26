@@ -20,11 +20,11 @@ const sessionLogger = createLogger('[SERVER] SessionActions');
 
 // Zod schemas
 const SessionCreationSchema = z.object({
-  type: z.string().min(1, { message: 'Session type is required' }).nullable(),
+  sessionTypeId: z.string().uuid({ message: 'Session type ID is required' }),
 });
 
 const SessionUpdateSchema = z.object({
-  type: z.string().min(1, { message: 'Session type is required' }).nullable(),
+  sessionTypeId: z.string().uuid({ message: 'Session type ID is required' }),
   completedAt: z.string().datetime().nullable(),
 });
 
@@ -39,7 +39,7 @@ export type SessionFormState = {
   message?: string;
   success?: boolean;
   errors?: {
-    type?: string[];
+    sessionTypeId?: string[];
     completedAt?: string[];
   };
 }
@@ -95,7 +95,7 @@ export async function fetchSessionsByType(type: string): Promise<SessionState> {
 export async function createNewSession(prevState: SessionFormState, formData: FormData): Promise<SessionFormState & { sessionId?: string }> {
   try {
     const sessionData = {
-      type: formData.get('type') as string,
+      sessionTypeId: formData.get('sessionTypeId') as string,
     };
 
     sessionLogger.info('Creating new session', { sessionData });
@@ -136,7 +136,7 @@ export async function createNewSession(prevState: SessionFormState, formData: Fo
 export async function updateExistingSession(id: string, prevState: SessionFormState, formData: FormData): Promise<SessionFormState> {
   try {
     const sessionData = {
-      type: formData.get('type') as string,
+      sessionTypeId: formData.get('sessionTypeId') as string,
       completedAt: formData.get('completedAt') as string,
     };
 

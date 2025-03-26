@@ -5,18 +5,21 @@ const SESSIONS_PATH = `${API_BASE_URL}/api/sessions`;
 
 export interface SessionDto {
   sessionId: string;
-  type: string | null;
+  sessionType: {
+    sessionTypeId: string;
+    name: string;
+  } | null;
   completedAt: string | null;
   startedAt: string;
   userId: string;
 }
 
 export interface SessionForCreationDto {
-  type: string | null;
+  sessionTypeId: string;
 }
 
 export interface SessionForUpdateDto {
-  type: string | null;
+  sessionTypeId: string;
   completedAt: string | null;
 }
 

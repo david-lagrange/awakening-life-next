@@ -22,11 +22,14 @@ export default function OpennessPage() {
 // Keep your responses conversational, warm, and focused on the user's growth. Avoid being overly directive or prescriptive.
 // `;
 
+  const opennessSessionTypeId = "799229e6-bb85-4f3d-b0a0-664640989215";
+
+
   return (
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col">
         <GuidedSession
-          sessionType="openness"
+          sessionTypeId={opennessSessionTypeId}
           model="gpt-4o"
           voice="alloy"
           color="#F59E0B"

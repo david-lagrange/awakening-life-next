@@ -69,11 +69,12 @@ export default function TechniqueTrainingPage() {
 
 // Always respond with warmth, patience, and deep presence. Your guidance should embody the very principles you're teaching.`;
 
+  const techniqueTrainingSessionTypeId = "3f732d9c-9819-480e-b599-9260e45d51bd";
   return (
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col">
         <GuidedSession
-          sessionType="technique-training"
+          sessionTypeId={techniqueTrainingSessionTypeId}
           model="gpt-4o"
           voice="alloy"
           color="#F59E0B"
